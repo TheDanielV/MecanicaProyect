@@ -1,0 +1,6 @@
+python manage.py makemigrations MecanicaApp
+python manage.py migrate --database=default MecanicaApp
+python manage.py makemigrations services
+python manage.py migrate --database=auth_db services
+
+
