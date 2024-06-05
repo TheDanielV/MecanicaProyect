@@ -1,0 +1,30 @@
+{% extends 'base/base.html' %}
+
+{% block content %}
+
+<h1>Register</h1>
+
+<form method="POST">
+    {% csrf_token %}
+    {{form.as_p}}
+    <button type="button" id="togglePassword" onclick="togglePasswordVisibility()">Mostrar Contraseña</button>
+    <button>
+        login
+    </button>
+
+</form>
+
+    <script>
+        function togglePasswordVisibility() {
+            var passwordField = document.getElementById("id_password");
+            var toggleButton = document.getElementById("togglePassword");
+            if (passwordField.type === "password") {
+                passwordField.type = "text";
+                toggleButton.textContent = "Ocultar Contraseña";
+            } else {
+                passwordField.type = "password";
+                toggleButton.textContent = "Mostrar Contraseña";
+            }
+        }
+    </script>
+{% endblock %}
