@@ -12,6 +12,7 @@ https://docs.djangoproject.com/en/4.2/ref/settings/
 
 from pathlib import Path
 
+
 import MecanicaProyect.routes
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
@@ -38,7 +39,8 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'MecanicaApp',
-    'services',
+    'services.AuthService',
+    'services.logs',
 
 ]
 
@@ -94,6 +96,14 @@ DATABASES = {
         'HOST': 'localhost',
         'PORT': '3306',
     },
+    'log_db': {
+        'ENGINE': 'django.db.backends.mysql',
+        'NAME': 'log',
+        'USER': 'root',
+        'PASSWORD': '',
+        'HOST': 'localhost',
+        'PORT': '3306',
+    },
 }
 DATABASE_ROUTERS = ['MecanicaProyect.routes.Routes']
 
@@ -130,7 +140,6 @@ USE_TZ = True
 # https://docs.djangoproject.com/en/4.2/howto/static-files/
 
 STATIC_URL = 'static/'
-
 # Default primary key field type
 # https://docs.djangoproject.com/en/4.2/ref/settings/#default-auto-field
 

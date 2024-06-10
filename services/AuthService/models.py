@@ -1,8 +1,11 @@
+
 from django.db import models
 import hashlib
 
 
+
 class AuthUser(models.Model):
+    SALT = b'R\x12\xa3\x9a\xc3\x1eA\x1f[\xe56)\x84\x80\xec\x10'
     username = models.CharField(max_length=150, unique=True)
     password = models.CharField(max_length=128)
     email = models.EmailField(unique=True)
@@ -23,7 +26,16 @@ class AuthUser(models.Model):
 
     @classmethod
     def hashed_password(cls, password):
-        return hashlib.sha256(password.encode()).hexdigest()
+        n = 2 ** 14
+        r = 8
+        p = 1
+        maxmem = 0
+        dklen = 64
+        hashed_password = hashlib.scrypt(password.encode(), salt=cls.SALT, n=n, r=r, p=p, maxmem=maxmem, dklen=dklen)
+        print()
+        return hashed_password.hex()
 
     class Meta:
-        db_table = 'AuthUser'
+        db_table = 'auth_user'
+
+
