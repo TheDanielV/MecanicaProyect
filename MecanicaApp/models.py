@@ -3,15 +3,15 @@ from django.db import models
 
 # Create your models here.
 class Person(models.Model):
-    name = models.CharField(max_length=30, default="Daniel")
-    ci = models.CharField(max_length=30, primary_key=True, default=1)
+    name = models.CharField(max_length=30)
+    ci = models.CharField(max_length=30)
 
     class Meta:
         abstract = True
 
 
 class Vehicle(models.Model):
-    placa = models.CharField(max_length=30,  primary_key=True)
+    placa = models.CharField(max_length=30)
 
 
 class Station(models.Model):
@@ -19,8 +19,8 @@ class Station(models.Model):
 
 
 class Employee(Person):
-    station_assigned = models.OneToOneField(Station, on_delete=models.CASCADE, null=False, blank=False)
+    station_assigned = models.CharField(max_length=30)
 
 
-class Customer(Person):
-    vehicle = models.OneToOneField(Vehicle, on_delete=models.CASCADE, null=False, blank=False)
+class Customer(models.Model):
+    vehicle = models.CharField(max_length=30)

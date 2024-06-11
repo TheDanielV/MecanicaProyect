@@ -1,0 +1,12 @@
+{% extends 'base/base.html' %}
+
+{% block content %}
+
+
+<div class="text-center"><h1>Register</h1></div>
+<div class="d-flex justify-content-center">
+    <img src="{% url 'qr_code' %}" alt="qr code">
+</div>
+    <p>{{error}}</p>
+    
+{% endblock %}

@@ -7,3 +7,4 @@ python manage.py migrate --database=auth_db AuthService
 python manage.py migrate --database=log_db logs
 
 
+

@@ -1,7 +1,7 @@
+import re
 
 from django.db import models
 import hashlib
-
 
 
 class AuthUser(models.Model):
@@ -11,9 +11,12 @@ class AuthUser(models.Model):
     email = models.EmailField(unique=True)
 
     def create_user(self, username, password, email):
-        self.username = username
-        self.password = self.hashed_password(password)
-        self.email = email
+        if not self.is_a_valid_password(password):
+            raise InvalidPassword("patron incorrecto ")
+        else:
+            self.username = username
+            self.password = self.hashed_password(password)
+            self.email = email
 
     @classmethod
     def is_authorized(cls, username, password):
@@ -35,7 +38,17 @@ class AuthUser(models.Model):
         print()
         return hashed_password.hex()
 
+    @classmethod
+    def is_a_valid_password(cls, password):
+        pattern = r'^(?=.*[0-9])(?=.*[a-z])(?=.*[A-Z]).{8,}$'
+        if re.fullmatch(pattern, password):
+            return True
+
     class Meta:
         db_table = 'auth_user'
 
 
+class InvalidPassword(Exception):
+    def __int__(self, message):
+        self.message = message
+        super().__int__(f"{message}:")
