@@ -8,4 +8,6 @@ urlpatterns = [
     path("", views.index, name="index"),
     path("register/", views.register, name="register"),
     path("qr/", views.qr_code_view, name="qr"),
+    path('generate_qr/', views.qr_code_view, name='generate_qr'),
+    path('login/', views.login, name='login'),
 ]

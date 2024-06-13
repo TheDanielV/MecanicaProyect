@@ -23,7 +23,7 @@ class AuthUser(models.Model):
         try:
             auth_user = cls.objects.using('auth_db').get(username=username)
             if auth_user.username == username & auth_user.password == cls.hashed_password(password):
-                return True
+                return auth_user.username
         except cls.DoesNotExist:
             return False
 

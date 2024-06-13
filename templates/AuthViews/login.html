@@ -1,0 +1,34 @@
+{% extends 'base/base.html' %}
+
+{% block content %}
+
+
+<div class="text-center"><h1>Register</h1></div>
+<div class="d-flex justify-content-center">
+<form method="POST">
+    {% csrf_token %}
+    {{form.as_p}}
+        <button  class="btn btn-primary">
+        LogIn
+    </button>
+    <button type="button" class="btn btn-secundary" id="togglePassword" onclick="togglePasswordVisibility()">Mostrar Contraseña</button>
+
+
+</form>
+</div>
+    <p>{{error}}</p>
+
+    <script>
+        function togglePasswordVisibility() {
+            var passwordField = document.getElementById("id_password");
+            var toggleButton = document.getElementById("togglePassword");
+            if (passwordField.type === "password") {
+                passwordField.type = "text";
+                toggleButton.textContent = "Ocultar Contraseña";
+            } else {
+                passwordField.type = "password";
+                toggleButton.textContent = "Mostrar Contraseña";
+            }
+        }
+    </script>
+{% endblock %}
