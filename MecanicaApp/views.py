@@ -9,7 +9,7 @@ from MecanicaApp.decorators import *
 AUTH_DATABASE = 'auth_db'
 LOG_DATABASE = 'log_db'
 session_user = "Daniel"
-
+#aaaaa
 
 def index(request):
     title = "MecanicaApp"
