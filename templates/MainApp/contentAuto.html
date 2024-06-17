@@ -5,12 +5,14 @@
 <!--MIS AUTOS-->
     <div class="container mt-5">
       <div class="d-flex justify-content-between align-items-center mb-3">
-        <h1 class="mx-auto text-uppercase text-center font-weight-bold">
+        <h3 class="mx-auto text-center font-weight-bold">
           Mis Autos
-        </h1>
+        </h3>
         <button
           class="btn btn-primary"
-          onclick="window.location.href = '{% url 'registrarAuto' %}' "
+          onclick="window.location.href = '{% url 'registrarAuto' %}'               
+          "
+          style="background-color:#A62D43; border-color:#A62D43"
         >
           Registrar auto
         </button>
@@ -35,27 +37,10 @@
           </div>
         </div>
       </div>
+    </div>
 
-      <div class="card shadow mt-5 mx-auto w-80">
-        <div class="row g-0">
-          <div class="col-md-4">
-            <img
-              src="https://www.pngall.com/wp-content/uploads/2016/07/Car-Free-Download-PNG.png"
-              class="img-fluid rounded-start"
-              alt="..."
-            />
-          </div>
-          <div class="col-md-8">
-            <div class="card-body">
-              <h5 class="card-text mt-4">Año:</h5>
-              <h5 class="card-text mt-4">Marca:</h5>
-              <h5 class="card-text mt-4">Modelo:</h5>
-              <h5 class="card-text mt-4">Placa:</h5>
-            </div>
-          </div>
-        </div>
-      </div>
-    </div>  
+      
+   
 
 
 {% endblock %}
