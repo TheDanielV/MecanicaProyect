@@ -1,4 +1,5 @@
 import re
+import uuid
 
 from django.db import models
 import hashlib
@@ -9,6 +10,7 @@ class AuthUser(models.Model):
     username = models.CharField(max_length=150, unique=True)
     password = models.CharField(max_length=128)
     email = models.EmailField(unique=True)
+    token = models.CharField(max_length=100, unique=True, null=False, default="00000")
 
     def create_user(self, username, password, email):
         if not self.is_a_valid_password(password):
@@ -17,6 +19,8 @@ class AuthUser(models.Model):
             self.username = username
             self.password = self.hashed_password(password)
             self.email = email
+            self.token = str(uuid.uuid4())
+            return self.token
 
     @classmethod
     def is_authorized(cls, username, password):
@@ -24,7 +28,7 @@ class AuthUser(models.Model):
 
             auth_user = cls.objects.using('auth_db').get(username=username)
             if auth_user.username == username and auth_user.password == cls.hashed_password(password):
-                return auth_user.username
+                return auth_user.token
         except cls.DoesNotExist:
             return None
 
