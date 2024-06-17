@@ -10,4 +10,8 @@ urlpatterns = [
     path("qr/", views.qr_page, name="qr"),
     path('generate_qr/', views.qr_code_view, name='generate_qr'),
     path('login/', views.login, name='login'),
+    path("qr/", views.qr_code_view, name="qr"),
+    path("mostrarAutos/", views.mostrar_autos, name="mostrarAutos"),
+    path("registrarAuto/",views.registrar_auto,name="registrarAuto")
+
 ]

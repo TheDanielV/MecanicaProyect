@@ -7,6 +7,7 @@ from django.db import IntegrityError
 from django.http import HttpResponse
 from MecanicaApp.decorators import *
 
+
 AUTH_DATABASE = 'auth_db'
 LOG_DATABASE = 'log_db'
 
@@ -79,3 +80,11 @@ def qr_code_view(request):
 @role_login_required(allowed_roles=['customer'])
 def qr_page(request):
     return render(request, 'MainApp/qrpagee.html', {'user': request.session.get('full_name')})
+
+
+def mostrar_autos(request):
+    return render(request, 'MainApp/contentAuto.html')
+
+
+def registrar_auto(request):
+    return render(request, 'MainApp/registerAuto.html')
