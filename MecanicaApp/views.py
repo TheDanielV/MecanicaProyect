@@ -2,14 +2,14 @@ from django.shortcuts import render, redirect
 from .forms import registerForm, loginForm
 from services.AuthService.models import *
 from .utils import *
+from .models import *
 from django.db import IntegrityError
 from django.http import HttpResponse
 from MecanicaApp.decorators import *
 
 AUTH_DATABASE = 'auth_db'
 LOG_DATABASE = 'log_db'
-session_user = "Daniel"
-#aaaaa
+
 
 def index(request):
     title = "MecanicaApp"
@@ -25,14 +25,14 @@ def register(request):
         form = registerForm(request.POST)
         if form.is_valid():
             user = AuthUser()
-
+            customer = Customer()
             try:
-                user.create_user(form.cleaned_data.get('user'),
-                                 form.cleaned_data.get('password'),
-                                 form.cleaned_data.get('email'))
-
+                token = user.create_user(form.cleaned_data.get('user'),
+                                         form.cleaned_data.get('password'),
+                                         form.cleaned_data.get('email'))
+                customer.create(form.cleaned_data.get('name'), form.cleaned_data.get('last_name'), form.cleaned_data.get('ci'), form.cleaned_data.get('cellphone'),form.cleaned_data.get('direction'), token)
                 user.save(using=AUTH_DATABASE)
-
+                customer.save(using='default')
                 return render(request, 'index.html', {
                     'title': "Usuario Creado"
                 })
@@ -52,12 +52,12 @@ def login(request):
         form = loginForm(request.POST)
         if form.is_valid():
             auth_user = AuthUser()
-            auth_key = auth_user.is_authorized(form.cleaned_data.get('username'),
+            auth_key = auth_user.is_authorized(form.cleaned_data.get('user'),
                                                form.cleaned_data.get('password'))
+            print("a")
             if auth_key is not None:
-                global session_user
-                session_user = auth_key
-                return render(request, 'MainApp/qrpagee.html', {'key_user': session_user})
+                request.session['token'] = auth_key
+                return redirect("qr")
             else:
                 return render(request, 'AuthViews/login.html', {'form': form, 'error': 'Invalid credentials'})
     else:
@@ -65,13 +65,17 @@ def login(request):
     return render(request, 'AuthViews/login.html', {'form': form})
 
 
-@key_user_required(value=session_user)
+@role_login_required(allowed_roles=['customer'])
 def qr_code_view(request):
+    person = None
+    if request.session.get('role') == 'customer':
+        person = Customer.get_customer(request.session.get('token'))
+
     # secret_key = os.urandom(32)
-    img = generate_qr_code("https://www.example.com")
+    img = generate_qr_code(serialize_object(person))
     return HttpResponse(img.getvalue(), content_type="image/png")
 
 
-@key_user_required(value=session_user)
+@role_login_required(allowed_roles=['customer'])
 def qr_page(request):
-    return render(request, 'MainApp/qrpagee.html', {'user': session_user})
+    return render(request, 'MainApp/qrpagee.html', {'user': request.session.get('full_name')})
