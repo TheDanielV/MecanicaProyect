@@ -2,13 +2,42 @@
 
 {% block content %}
 
-    <div class="container mt-5">
-      <div class="d-flex justify-content-between align-items-center mb-3">
-        <h1 class="mx-auto text-uppercase text-center font-weight-bold">
-          Registrar Auto
-        </h1>
+
 
     </div>
+        <h1 class="mt-5 text-center">Registrar Vehículo</h1>
+
+        <div class="container mt-4 d-flex justify-content-center">
+        <form method="post" action="URL_DONDE_ENVIAR_EL_FORMULARIO" class="w-50">
+            <div class="form-group mb-3">
+                <label for="año">Año</label>
+                <input type="text" class="form-control mt-2" id="año" name="año" placeholder="Ingrese el año " required>
+            </div>
+
+             <div class="form-group mb-3">
+                <label for="marca">Marca</label>
+                <input type="text" class="form-control mt-2" id="marca" name="marca" placeholder="Ingrese la marca" required>
+            </div>
+
+             <div class="form-group mb-3">
+                <label for="modelo">Modelo</label>
+                <input type="text" class="form-control mt-2" id="modelo" name="modelo" placeholder="Ingrese el modelo" required>
+            </div>
+
+             <div class="form-group mb-3">
+                <label for="placa">Placa</label>
+                <input type="text" class="form-control mt-2 "  id="placa" name="placa" placeholder="Ingrese la placa" required>
+            </div>
+
+            <div class="form-group mb-3">
+                <label for="color">Color</label>
+                <input type="text" class="form-control mt-2" id="color" name="color" placeholder="Ingrese el color" required>
+            </div>
+
+            <div class="text-center mt-4">
+                <button type="submit" class="btn btn-lg" style="background-color:#A62D43; border-color:#A62D43; color:#fff";">Registrar</button>
+            </div>
+        </form>
     </div>
 
 
