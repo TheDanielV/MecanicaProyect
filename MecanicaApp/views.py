@@ -7,7 +7,6 @@ from .utils import *
 from django.db import IntegrityError
 from django.http import HttpResponse
 
-
 AUTH_DATABASE = 'auth_db'
 LOG_DATABASE = 'log_db'
 
@@ -58,3 +57,11 @@ def qr_code_view(request):
     print(secret_key)  # Guarda esta clave de manera segura
     img = None
     return HttpResponse(img.getvalue(), content_type="image/png")
+
+
+def mostrar_autos(request):
+    return render(request, 'MainApp/contentAuto.html')
+
+
+def registrar_auto(request):
+    return render(request, 'MainApp/registerAuto.html')
