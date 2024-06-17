@@ -7,7 +7,6 @@ from django.db import IntegrityError
 from django.http import HttpResponse
 from MecanicaApp.decorators import *
 
-
 AUTH_DATABASE = 'auth_db'
 LOG_DATABASE = 'log_db'
 
@@ -31,7 +30,9 @@ def register(request):
                 token = user.create_user(form.cleaned_data.get('user'),
                                          form.cleaned_data.get('password'),
                                          form.cleaned_data.get('email'))
-                customer.create(form.cleaned_data.get('name'), form.cleaned_data.get('last_name'), form.cleaned_data.get('ci'), form.cleaned_data.get('cellphone'),form.cleaned_data.get('direction'), token)
+                customer.create(form.cleaned_data.get('name'), form.cleaned_data.get('last_name'),
+                                form.cleaned_data.get('ci'), form.cleaned_data.get('cellphone'),
+                                form.cleaned_data.get('direction'), token)
                 user.save(using=AUTH_DATABASE)
                 customer.save(using='default')
                 return render(request, 'index.html', {
@@ -58,7 +59,7 @@ def login(request):
             print("a")
             if auth_key is not None:
                 request.session['token'] = auth_key
-                return redirect("qr")
+                return redirect("mostrarAutos")
             else:
                 return render(request, 'AuthViews/login.html', {'form': form, 'error': 'Invalid credentials'})
     else:
@@ -72,19 +73,21 @@ def qr_code_view(request):
     if request.session.get('role') == 'customer':
         person = Customer.get_customer(request.session.get('token'))
 
-    # secret_key = os.urandom(32)
-    img = generate_qr_code(serialize_object(person))
+    img = generate_qr_code(encrypt_serializer_object(serialize_object(person)))
     return HttpResponse(img.getvalue(), content_type="image/png")
 
 
 @role_login_required(allowed_roles=['customer'])
 def qr_page(request):
-    return render(request, 'MainApp/qrpagee.html', {'user': request.session.get('full_name')})
+    return render(request, 'MainApp/qrpagee.html',
+                  {'user': request.session.get('full_name'), 'role': request.session.get('role')})
 
 
+@role_login_required(allowed_roles=['customer'])
 def mostrar_autos(request):
     return render(request, 'MainApp/contentAuto.html')
 
 
+@role_login_required(allowed_roles=['customer'])
 def registrar_auto(request):
     return render(request, 'MainApp/registerAuto.html')

@@ -38,6 +38,7 @@ class Customer(Person):
     def get_customer(token):
         return Customer.objects.get(token=token)
 
+
 class Vehicle(models.Model):
     customer = models.ForeignKey(Customer, on_delete=models.CASCADE, related_name='vehicles', default="0000000000")
     marca = models.CharField(max_length=255, default=None)
@@ -55,3 +56,5 @@ class Station(models.Model):
 
 class Employee(Person):
     station = models.ForeignKey(Station, on_delete=models.CASCADE, related_name='employees')
+
+
