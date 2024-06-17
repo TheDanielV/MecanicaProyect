@@ -8,7 +8,10 @@
         <h1 class="mt-5 text-center">Registrar Vehículo</h1>
 
         <div class="container mt-4 d-flex justify-content-center">
-        <form method="post" action="URL_DONDE_ENVIAR_EL_FORMULARIO" class="w-50">
+        
+        <!-- Formulario Registro de Vehiculo-->
+        <form id="formularioAutos" method="post" action='{% url 'mostrarAutos' %}' class="w-50">
+            {% csrf_token %}
             <div class="form-group mb-3">
                 <label for="año">Año</label>
                 <input type="text" class="form-control mt-2" id="año" name="año" placeholder="Ingrese el año " required>
@@ -34,11 +37,32 @@
                 <input type="text" class="form-control mt-2" id="color" name="color" placeholder="Ingrese el color" required>
             </div>
 
-            <div class="text-center mt-4">
-                <button type="submit" class="btn btn-lg" style="background-color:#A62D43; border-color:#A62D43; color:#fff";">Registrar</button>
-            </div>
+               <div class="text-center mt-4">
+            <button type="button" class="btn btn-lg" style="background-color:#A62D43; border-color:#A62D43; color:#fff;" onclick="mostrarAlerta()">Registrar</button>
+        </div>
         </form>
+        
     </div>
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    
 
-
+   
+<script>
+    function mostrarAlerta() {
+        Swal.fire({
+            title: '¡Ingreso correctamente!',
+            icon: 'success',
+            confirmButtonText: 'Aceptar',
+            customClass: {
+                confirmButton: 'swal2-confirm'
+            }
+        }).then((result) => {
+            if (result.isConfirmed) {
+                // Envía el formulario después de que el usuario cierra la alerta
+                document.getElementById('formularioAutos').submit();
+            }
+        });
+    }
+</script>
+    
 {% endblock %}
