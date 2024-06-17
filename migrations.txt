@@ -1,10 +1,10 @@
-python manage.py makemigrations MecanicaApp
+python manage.py makemigrations
 python manage.py makemigrations AuthService
 python manage.py makemigrations logs
 
-python manage.py migrate --database=default MecanicaApp
+python manage.py migrate
 python manage.py migrate --database=auth_db AuthService
 python manage.py migrate --database=log_db logs
 
-
+# No se Asusten por el error ese xdddd
 

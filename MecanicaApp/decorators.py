@@ -1,16 +1,23 @@
+from django.http import JsonResponse
 from functools import wraps
+from .models import Person  # Asegúrate de que Persona está correctamente importado
 
-from django.http import HttpResponseForbidden
 
+def role_login_required(view_func):
+    @wraps(view_func)
+    def _wrapped_view(request, *args, **kwargs):
+        username = request.session.get('username', 'default')
+        if not username:
+            return JsonResponse({'error': 'No username provided'}, status=400)
 
-def key_user_required(value):
-    def decorator(view_func):
-        @wraps(view_func)
-        def _wrapped_view(request, *args, **kwargs):
-            # Comprueba el valor de la variable global
-            if value is not None:
-                return view_func(request, *args, **kwargs)
-            else:
-                return HttpResponseForbidden("No tienes permiso para acceder a esta página.")
-        return _wrapped_view
-    return decorator
+        try:
+            persona = Person.objects.get(username=username)
+        except Person.DoesNotExist:
+            return JsonResponse({'error': 'Invalid username'}, status=401)
+
+        # Si es necesario, puedes adjuntar el usuario al request
+        request.persona = persona
+
+        return view_func(request, *args, **kwargs)
+
+    return _wrapped_view

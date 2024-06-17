@@ -21,11 +21,12 @@ class AuthUser(models.Model):
     @classmethod
     def is_authorized(cls, username, password):
         try:
+
             auth_user = cls.objects.using('auth_db').get(username=username)
-            if auth_user.username == username & auth_user.password == cls.hashed_password(password):
+            if auth_user.username == username and auth_user.password == cls.hashed_password(password):
                 return auth_user.username
         except cls.DoesNotExist:
-            return False
+            return None
 
     @classmethod
     def hashed_password(cls, password):
