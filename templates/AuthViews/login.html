@@ -1,34 +1,46 @@
 {% extends 'base/base.html' %}
 
+{% load static %}
+
 {% block content %}
 
+<div class="jumbotron">
+  <h1 class="display-4">¡Bienvenido!</h1>
+  <p class="lead">Gracias por visitar nuestra página.</p>
+  <hr class="my-4">
+  <img src="{% static 'descarga.jfif' %}" class="img-fluid" alt="Responsive image">
+  <p></p>
 
-<div class="text-center"><h1>Register</h1></div>
-<div class="d-flex justify-content-center">
-<form method="POST">
-    {% csrf_token %}
-    {{form.as_p}}
-        <button  class="btn btn-primary">
-        LogIn
-    </button>
-    <button type="button" class="btn btn-secundary" id="togglePassword" onclick="togglePasswordVisibility()">Mostrar Contraseña</button>
+  <div class="container mt-5">
+    <div class="row justify-content-center">
+      <div class="col-md-6">
+        <div class="card">
+          <div class="card-header text-center">
+            <h3>Inicio de sesión</h3>
+          </div>
+          <div class="card-body">
+            <form method="post">
+              {% csrf_token %}
+              {{ form.as_p }}
+              <button type="submit" class="btn btn-primary btn-block" style="background-color:#2C2F40; border-color:#2C2F40">
+                Iniciar sesión
+              </button>
+              <button class="btn btn-primary btn-block" onclick="window.location.href = '{% url 'register' %}'" style="background-color:#A62D43; border-color:#A62D43">
+                Registrar
+              </button>
 
+              <a class="btn btn-link btn-block" style="color:#2C2F40;">
 
-</form>
+                ¿Olvidaste tu contraseña?
+              </a>
+            </form>
+            <div>{{ error }}</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
 </div>
-    <p>{{error}}</p>
 
-    <script>
-        function togglePasswordVisibility() {
-            var passwordField = document.getElementById("id_password");
-            var toggleButton = document.getElementById("togglePassword");
-            if (passwordField.type === "password") {
-                passwordField.type = "text";
-                toggleButton.textContent = "Ocultar Contraseña";
-            } else {
-                passwordField.type = "password";
-                toggleButton.textContent = "Mostrar Contraseña";
-            }
-        }
-    </script>
 {% endblock %}
