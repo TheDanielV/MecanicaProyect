@@ -46,7 +46,7 @@
             style="font-family: 'Arial', sans-serif; font-size: 20px"
           >
             <li class="nav-item">
-              <a class="nav-link" href="#" style="color:#ffff"> Iniciar Sesión </a>
+              <a class="nav-link" href="{% url 'login' %}" style="color:#ffff"> Iniciar Sesión </a>
             </li>
           </ul>
         </div>
@@ -56,21 +56,60 @@
     {% block content %}
     {% endblock %}
 
-    <!--Footer-->
+   <!--Footer-->
 
-    <footer class="footer-container mt-3" style="background-color:#D9C49C">
-        <div class="col-12 col-md-6 col-lg-2 mx-auto mt-5 mb-3">
-            <h5 class=" mb-3 font-weight-bold text-primary mt-5">Contacto</h5>
+    <footer  style="background-color:#D9C49C" class="mt-5 ">
+       <div class="row">
+           <div class="col-12 col-md-6 col-lg-3 text-center">
 
-            <p><i class="fas fa-home me-1"></i> Quito, La Pradera</p>
-            <p><i class="fas fa-envelope me-1"></i> tarquinolubricadora@gmail.com</p>
-            <p><i class="fas fa-phone me-1"></i> +593 987517368</p>
-        </div>
-        <div class="text-center p-3" style="background-color: rgba(0, 0, 0, 0.2)">
+               <div class="single-box mt-5">
+                   <img src="https://lubricadoratarquino.com/wp-content/uploads/2021/08/logo-tarquino_Mesa-de-trabajo-1.png" alt="" height="50">
+               </div>
+
+           </div>
+
+           <div class="col-12 col-md-6 col-lg-3" style="color:#2C2F40;font-family: Arial, sans-serif;">
+               <h5 class="mt-4" style="font-weight: bold;font-size: 20px;" >NOSOTROS</h5>
+               <p class="text-justify mt-3" style="color:#2C2F40">En MecHelp nos especializamos en proporcionar servicios de mecánica confiables y eficientes para satisfacer todas tus necesidades automotrices. Con años de experiencia en el campo, nuestro equipo de expertos está comprometido a ofrecerte un servicio de calidad que garantice el rendimiento óptimo de tu vehículo.</p>
+
+           </div>
+
+           <div class="col-12 col-md-6 col-lg-3 " style="color:#2C2F40;font-family: Arial, sans-serif;">
+               <h5 class="mt-4" style="font-weight: bold;font-size: 20px;">SERVICIOS</h5>
+
+              <ul class="list-unstyled mt-3 ">
+                    <li>Cambio de aceite</li>
+                    <li>Alineación y balanceo</li>
+                    <li>ABC de motor</li>
+              </ul>
+           </div>
+
+           <div class="col-12 col-md-6 col-lg-3" style="color:#2C2F40; font-family: Arial, sans-serif;">
+               <h5 class="mt-4" style="font-weight: bold;font-size: 20px;">CONTACTOS</h5>
+                <div class="card-area">
+                    <p>
+                        <i class="fas fa-home me-3 "></i> Quito, La Pradera
+                    </p>
+                    <p>
+                        <i class="fas fa-envelope me-3 "></i> lubricadora@gmail.com
+                    </p>
+                     <p>
+                        <i class="fas fa-phone me-3 "></i> +593 987679038
+                    </p>
+
+                </div>
+           </div>
+
+
+       </div>
+
+        <div class="text-center p-3" style="background-color: rgba(0, 0, 0, 0.2); color:#2C2F40">
             © 2024 SeguriSoft | Todos los derechos reservados
         </div>
     </footer>
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+
+
   </body>
 </html>
