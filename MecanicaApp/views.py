@@ -1,7 +1,7 @@
 import os
 
 from django.shortcuts import render, redirect
-from .forms import registerForm, loginForm
+from .forms import *
 from services.AuthService.models import *
 from .utils import *
 from .models import *
@@ -132,9 +132,55 @@ def mostrar_estacion(request):
     return render(request, 'MainApp/contentEstacion.html', {'vehiculos': vehiculos})
 
 
-def token_sended_test(request):
-    passwordReset = PasswordReset()
+def send_email_form(request):
+    if request.method == 'POST':
+        form = EmailForm(request.POST)
 
-    passwordReset.get_remember_password_token("vargasdanielmastercrack99@gmail.com")
-    print("token " + passwordReset.token)
-    return render(request, 'index.html')
+        email = request.POST.get('email')
+        try:
+            passwordReset = PasswordReset()
+            token = passwordReset.get_remember_password_token(email)
+            send_token_email(email, token)
+            return redirect('enviarCorreo')
+        except Exception as e:
+            return render(request, 'AuthViews/emailInput.html', {'form': form, 'error': e})
+    else:
+        form = EmailForm()
+        return render(request, 'AuthViews/emailInput.html', {'form': form})
+
+
+def token_sended_test(request):
+    if request.method == 'POST':
+        form = tokenForm(request.POST)
+
+        token = request.POST.get('token')
+        try:
+            passwordReset = PasswordReset()
+            token_user = passwordReset.update_password_with_token(token)
+            request.session['password_confirmation'] = token_user
+            return redirect('confirmarContrasenia')
+        except Exception as e:
+            return render(request, 'AuthViews/tokenInput.html', {'form': form, 'error': e})
+    else:
+        form = tokenForm()
+        return render(request, 'AuthViews/tokenInput.html', {'form': form})
+
+
+def password_confirmation(request):
+    if request.method == 'POST':
+        form = passwordForm(request.POST)
+        token_user = request.session.get('password_confirmation')
+        password = request.POST.get('password')
+        password_cofirm = request.POST('password_confirmation')
+        if password_cofirm != password:
+            try:
+                auth_user = AuthUser()
+                auth_user.update_password(token=token_user, password=password)
+                return redirect('index')
+            except Exception as e:
+                return render(request, 'AuthViews/tokenInput.html', {'form': form, 'error': e})
+        else:
+            return render(request, 'AuthViews/tokenInput.html', {'form': form})
+    else:
+        form = passwordForm()
+        return render(request, 'AuthViews/tokenInput.html', {'form': form})

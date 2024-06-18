@@ -13,6 +13,9 @@ urlpatterns = [
     path("mostrarAutos/", views.mostrar_autos, name="mostrarAutos"),
     path("registrarAuto/", views.registrar_auto, name="registrarAuto"),
     path("mostrarEstacion/", views.mostrar_estacion, name="mostrarEstacion"),
-    path("enviarCorreo/",views.token_sended_test, name="enviarCorreo")
+    path("enviarCorreo/",views.token_sended_test, name="enviarCorreo"),
+    path("recuperarContraseña/",views.send_email_form, name="recuperarContraseña"),
+    path("confirmarContrasenia/", views.password_confirmation, name="confirmarContrasenia"),
+
 
 ]
