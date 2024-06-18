@@ -90,3 +90,19 @@ def mostrar_autos(request):
 
 def registrar_auto(request):
     return render(request, 'MainApp/registerAuto.html')
+
+def mostrar_estacion(request):
+    # Datos de ejemplo, estos datos deben provenir de tu base de datos
+    vehiculos = [
+        {
+            'placa': 'PDB-1856',
+            'especificaciones': 'Aceite sintético, 5W-30, 5 litros'
+        },
+        {
+            'placa': 'XYZ-1234',
+            'especificaciones': 'Aceite mineral, 10W-40, 4 litros'
+        }
+    ]
+
+    return render(request, 'MainApp/contentEstacion.html', {'vehiculos': vehiculos})
+

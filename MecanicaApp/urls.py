@@ -12,6 +12,7 @@ urlpatterns = [
     path('login/', views.login, name='login'),
     path("qr/", views.qr_code_view, name="qr"),
     path("mostrarAutos/", views.mostrar_autos, name="mostrarAutos"),
-    path("registrarAuto/",views.registrar_auto,name="registrarAuto")
+    path("registrarAuto/",views.registrar_auto,name="registrarAuto"),
+    path("mostrarEstacion/",views.mostrar_estacion, name="mostrarEstacion"),
 
 ]
