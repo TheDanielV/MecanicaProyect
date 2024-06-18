@@ -3,46 +3,45 @@
 {% block content %}
 
 <!--MIS AUTOS-->
-    <div class="container mt-5">
-      <div class="d-flex justify-content-between align-items-center mb-3">
-        <h1 class="mx-auto text-center font-weight-bold">
-          Mis Autos
-        </h1>
-        <button
-          class="btn btn-lg"
-          onclick="window.location.href = '{% url 'registrarAuto' %}'
-          "
-          style="background-color:#A62D43; border-color:#A62D43; color:#ffff"
-        >
-          Registrar vehículo
-        </button>
-      </div>
+<div class="container mt-5">
+  <div class="d-flex justify-content-between align-items-center mb-3">
+    <h1 class="mx-auto text-center font-weight-bold">
+      Mis Autos
+    </h1>
+    <button class="btn btn-lg" onclick="window.location.href = '{% url 'registrarAuto' %}'
+          " style="background-color:#A62D43; border-color:#A62D43; color:#ffff">
+      Registrar vehículo
+    </button>
+  </div>
 
   {% for auto in autos %}
-    <div class="card shadow mt-5 mx-auto w-80">
-        <div class="row g-0">
-            <div class="col-md-4">
-                <img src="https://cdn.pixabay.com/photo/2015/10/01/17/17/car-967387_1280.png"
-                    class="img-fluid rounded-start" alt="..." />
-            </div>
-            <div class="col-md-8">
-                <div class="card-body">
-                    <h5 class="card-text mt-2">Año: {{ auto.anio }}</h5>
-                    <h5 class="card-text mt-4">Marca: {{ auto.marca }}</h5>
-                    <h5 class="card-text mt-4">Modelo: {{ auto.model }}</h5>
-                    <h5 class="card-text mt-4">Placa: {{ auto.placa }}</h5>
-                     <button 
-                        class="btn btn-danger mt-4" 
-                        onclick="confirmDeletion({{ auto.id }})">
-                        Eliminar
+  <div class="row ">
+    <div class="col-12 col-md-8 offset-md-2 mb-3">
+        <div class="card shadow">
+            <div class="card-body">
+                <h5 class="card-title text-center" style="font-size: 22px;">Especificaciones</h5>
+                <div class="row">
+                    <div class="col-4">
+                        <p class="text-center mt-3">Placa:</p>
+                        <p class="placa bg-light p-3 mt-3 text-center" style="font-size: 24px;
+            font-weight: bold;">{{ auto.placa }}</p>
+                    </div>
+                    <div class="col-8 mt-3">
+                        <p>Año: {{ auto.anio }} </p>
+                        <p>Marca: {{ auto.marca }}</p>
+                        <p>Modelo: {{ auto.modelo }}</p>
+                        <button class="btn btn-danger mt-4" onclick="confirmDeletion({{ auto.id }})">
+                            Eliminar
                         </button>
+                    </div>
                 </div>
             </div>
         </div>
     </div>
-    {% endfor %}
-    
-    <script>
+</div>
+  {% endfor %}
+
+  <script>
     function confirmDeletion(vehiculoId) {
       Swal.fire({
         title: '¿Estás seguro?',
@@ -59,7 +58,7 @@
       });
     }
   </script>
-    </div>
+</div>
 
 
 
