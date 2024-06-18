@@ -1,5 +1,6 @@
 import os
 
+from django.contrib.auth import logout
 from django.shortcuts import render, redirect
 from .forms import *
 from services.AuthService.models import *
@@ -183,7 +184,8 @@ def password_confirmation(request):
             try:
                 auth_user = AuthUser()
                 auth_user.update_password(token=token_user, password=password)
-                return redirect('index')
+                logout_user(request)
+                return redirect('login')
             except Exception as e:
                 return render(request, 'AuthViews/tokenInput.html', {'form': form, 'error': e})
         else:
@@ -191,6 +193,7 @@ def password_confirmation(request):
     else:
         form = passwordForm()
         return render(request, 'AuthViews/tokenInput.html', {'form': form})
+
 
 @role_login_required(allowed_roles=['customer'])
 def eliminar_auto(request, auto_id):
@@ -205,3 +208,8 @@ def eliminar_auto(request, auto_id):
         messages.error(request, 'Vehículo no encontrado.')
 
     return redirect('mostrarAutos')
+
+
+def logout_user(request):
+    logout(request)
+    return redirect('index')

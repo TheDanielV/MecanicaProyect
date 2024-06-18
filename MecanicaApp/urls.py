@@ -19,5 +19,6 @@ urlpatterns = [
 
     path("registrarAuto/",views.registrar_auto,name="registrarAuto"),
     path('eliminarAuto/<int:auto_id>/', views.eliminar_auto, name='eliminarAuto'),
+    path('logout/', views.logout_user, name='logout')
 
 ]
