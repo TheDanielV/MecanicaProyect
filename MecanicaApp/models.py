@@ -14,6 +14,7 @@ class Person(models.Model):
     last_name = models.CharField(max_length=30, null=False, default="None")
     role = models.CharField(max_length=100, choices=[(tag.name, tag.value) for tag in Role],
                             default=Role.CUSTOMER.value)
+    token = models.CharField(max_length=100, null=False, unique=True, default="00000")
 
     class Meta:
         abstract = True
@@ -23,6 +24,19 @@ class Customer(Person):
     ci = models.CharField(max_length=20, primary_key=True, default="0000000000")
     cellphone = models.CharField(max_length=20, default="0000000000")
     direction = models.CharField(max_length=255, default="None")
+
+    def create(self, name, last_name, ci, cellphone, direction, token):
+        self.name = name
+        self.token = token
+        self.last_name = last_name
+        self.ci = ci
+        self.cellphone = cellphone
+        self.direction = direction
+        self.role = Person.Role.CUSTOMER.value
+
+    @staticmethod
+    def get_customer(token):
+        return Customer.objects.get(token=token)
 
 
 class Vehicle(models.Model):
@@ -42,3 +56,5 @@ class Station(models.Model):
 
 class Employee(Person):
     station = models.ForeignKey(Station, on_delete=models.CASCADE, related_name='employees')
+
+

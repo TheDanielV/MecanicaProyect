@@ -5,7 +5,8 @@
     <title>QR Code Generator</title>
 </head>
 <body>
-    <h1>Hi {{ key_user}}, your QR Code</h1>
+    <h1>Hi {{ user}}, your QR Code</h1>
+    <h3>and your role is: {{ role }}</h3>
     <img src="{% url 'generate_qr' %}" alt="QR Code">
 </body>
 </html>
