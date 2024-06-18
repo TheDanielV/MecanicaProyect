@@ -36,13 +36,15 @@
                 <div class="input-group">
                   {{ form.password }}
                   <div class="input-group-append">
-                    <span class="input-group-text" id="togglePassword" onclick="togglePasswordVisibility()">
+                  <button type="button" class="btn btn-secondary" onclick="togglePasswordVisibility(this)">
                       Mostrar Contraseña
-                    </span>
+                    </button>
+
                   </div>
+
                 </div>
               </div>
-              <div class="text-center mb-3">
+              <div class="text-center mb-3 ">
                 <button type="submit" class="btn btn-primary" style="background-color:#2C2F40; border-color:#2C2F40;">
                   Iniciar sesión
                 </button>
@@ -71,16 +73,17 @@
 </style>
 
 <script>
-  function togglePasswordVisibility() {
+  function togglePasswordVisibility(button) {
     var passwordField = document.getElementById("id_password");
-    var toggleButton = document.getElementById("togglePassword");
-    if (passwordField.type === "password") {
-      passwordField.type = "text";
-      toggleButton.textContent = "Ocultar Contraseña";
-    } else {
-      passwordField.type = "password";
-      toggleButton.textContent = "Mostrar Contraseña";
-    }
+
+    // Comprobar si el campo de contraseña es visible o no
+    var isPasswordVisible = (passwordField.type === "text");
+
+    // Cambiar el tipo de campo de contraseña
+    passwordField.type = isPasswordVisible ? "password" : "text";
+
+    // Cambiar el texto del botón
+    button.textContent = isPasswordVisible ? "Mostrar Contraseña" : "Ocultar Contraseña";
   }
 </script>
 
