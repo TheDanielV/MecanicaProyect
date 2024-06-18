@@ -25,7 +25,7 @@
             <h3>Inicio de sesión</h3>
           </div>
           <div class="card-body">
-            <form method="post">
+            <form method="post" id="loginForm">
               {% csrf_token %}
               <div class="form-group">
                 {{ form.user.label_tag }}
@@ -36,15 +36,13 @@
                 <div class="input-group">
                   {{ form.password }}
                   <div class="input-group-append">
-                  <button type="button" class="btn btn-secondary" onclick="togglePasswordVisibility(this)">
+                    <button type="button" class="btn btn-secondary" onclick="togglePasswordVisibilityLogin(this)">
                       Mostrar Contraseña
                     </button>
-
                   </div>
-
                 </div>
               </div>
-              <div class="text-center mb-3 ">
+              <div class="text-center mb-3">
                 <button type="submit" class="btn btn-primary" style="background-color:#2C2F40; border-color:#2C2F40;">
                   Iniciar sesión
                 </button>
@@ -53,11 +51,65 @@
                 </button>
               </div>
               <div class="text-center">
-                <a class="btn btn-link" style="color:#2C2F40;">
+                <!-- Botón para olvidar contraseña -->
+                <a href="#" class="btn btn-link" style="color:#2C2F40;" onclick="mostrarFormularioCorreo()">
                   ¿Olvidaste tu contraseña?
                 </a>
               </div>
             </form>
+            <!-- Formulario para recuperación de contraseña -->
+            <div id="formRecuperar" style="display: none;">
+              <form method="post" id="formCorreo" onsubmit="return enviarCorreo()">
+                {% csrf_token %}
+                <div class="form-group">
+                  <label for="correo">Ingrese su correo:</label>
+                  <input type="email" class="form-control" id="correo" name="correo" required>
+                </div>
+                <div class="text-center mb-3">
+                  <button type="submit" class="btn btn-primary btn-block" style="background-color:#A62D43; border-color:#A62D43;" >Enviar</button>
+                </div>
+              </form>
+
+              <form method="post" id="formToken" style="display: none;">
+                {% csrf_token %}
+                <div class="form-group">
+                  <label for="token">Ingrese el token:</label>
+                  <input type="text" class="form-control" id="token" name="token" required>
+                </div>
+                <div class="text-center mb-3">
+                  <button type="button" class="btn btn-primary btn-block" onclick="verificarToken()" style="background-color:#A62D43; border-color:#A62D43;">Verificar Token</button>
+                </div>
+              </form>
+
+              <form method="post" id="formNuevaContraseña" style="display: none;">
+                {% csrf_token %}
+                <div class="form-group">
+                  <label for="nueva_contraseña">Nueva Contraseña:</label>
+                  <div class="input-group">
+                    <input type="password" class="form-control" id="nueva_contraseña" name="nueva_contraseña" required>
+                    <div class="input-group-append">
+                      <button type="button" class="btn btn-secondary" onclick="togglePasswordVisibilityReset('nueva_contraseña', this)">
+                        Mostrar Contraseña
+                      </button>
+                    </div>
+                  </div>
+                </div>
+                <div class="form-group">
+                  <label for="confirmar_contraseña">Confirmar Contraseña:</label>
+                  <div class="input-group">
+                    <input type="password" class="form-control" id="confirmar_contraseña" name="confirmar_contraseña" required>
+                    <div class="input-group-append">
+                      <button type="button" class="btn btn-secondary" onclick="togglePasswordVisibilityReset('confirmar_contraseña', this)">
+                        Mostrar Contraseña
+                      </button>
+                    </div>
+                  </div>
+                </div>
+                <div class="text-center mb-3">
+                  <button type="submit" class="btn btn-primary btn-block" onclick="guardarContraseña() " style="background-color:#A62D43; border-color:#A62D43;">Guardar Contraseña</button>
+                </div>
+              </form>
+            </div>
             <div>{{ error }}</div>
           </div>
         </div>
@@ -73,8 +125,62 @@
 </style>
 
 <script>
-  function togglePasswordVisibility(button) {
+  // Función para mostrar el formulario de recuperación de contraseña
+  function mostrarFormularioCorreo() {
+    document.getElementById('formRecuperar').style.display = 'block';
+    document.getElementById('loginForm').querySelectorAll('input, button').forEach(el => {
+      el.disabled = true;
+    });
+  }
+
+  // Función para enviar el correo electrónico y mostrar el formulario de token
+  function enviarCorreo() {
+    var correo = document.getElementById('correo').value;
+    // Aquí puedes implementar el código para enviar el correo electrónico y procesar la respuesta
+    document.getElementById('formCorreo').style.display = 'none';
+    document.getElementById('formToken').style.display = 'block';
+    return false; // Evitar envío del formulario por ahora
+  }
+
+  // Función para verificar el token y mostrar el formulario de nueva contraseña
+  function verificarToken() {
+    // Aquí puedes implementar el código para verificar el token y procesar la respuesta
+    document.getElementById('formToken').style.display = 'none';
+    document.getElementById('formNuevaContraseña').style.display = 'block';
+  }
+
+  // Función para guardar la nueva contraseña
+  function guardarContraseña() {
+    // Aquí puedes implementar el código para guardar la nueva contraseña
+    // Por ejemplo, enviar una solicitud al servidor para actualizar la contraseña
+    // Una vez guardada la contraseña, habilitar el formulario de inicio de sesión nuevamente
+    habilitarFormularioLogin();
+  }
+
+  // Función para habilitar el formulario de inicio de sesión
+  function habilitarFormularioLogin() {
+    document.getElementById('loginForm').querySelectorAll('input, button').forEach(el => {
+      el.disabled = false;
+    });
+  }
+
+  // Función para alternar la visibilidad de la contraseña en el formulario de inicio de sesión
+  function togglePasswordVisibilityLogin(button) {
     var passwordField = document.getElementById("id_password");
+
+    // Comprobar si el campo de contraseña es visible o no
+    var isPasswordVisible = (passwordField.type === "text");
+
+    // Cambiar el tipo de campo de contraseña
+    passwordField.type = isPasswordVisible ? "password" : "text";
+
+    // Cambiar el texto del botón
+    button.textContent = isPasswordVisible ? "Mostrar Contraseña" : "Ocultar Contraseña";
+  }
+
+  // Función para alternar la visibilidad de la contraseña en el formulario de reestablecimiento de contraseña
+  function togglePasswordVisibilityReset(fieldId, button) {
+    var passwordField = document.getElementById(fieldId);
 
     // Comprobar si el campo de contraseña es visible o no
     var isPasswordVisible = (passwordField.type === "text");
