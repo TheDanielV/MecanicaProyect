@@ -101,6 +101,7 @@ class PasswordReset(models.Model):
                 raise Exception("El token expiró")
             else:
                 password_reset = cls.objects.get(token=token)
+                password_reset.delete()
                 return AuthUser.objects.get(email=password_reset.email).token
         except PasswordReset.DoesNotExist:
             raise Exception("Token no válido o ya usado")
