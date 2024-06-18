@@ -1,3 +1,5 @@
+import os
+
 from django.shortcuts import render, redirect
 from .forms import registerForm, loginForm
 from services.AuthService.models import *
@@ -6,6 +8,7 @@ from .models import *
 from django.db import IntegrityError
 from django.http import HttpResponse
 from MecanicaApp.decorators import *
+
 
 AUTH_DATABASE = 'auth_db'
 LOG_DATABASE = 'log_db'
@@ -84,10 +87,28 @@ def qr_page(request):
 
 
 @role_login_required(allowed_roles=['customer'])
+    return render(request, 'MainApp/qrpagee.html', {'user': request.session.get('full_name')})
+
+
 def mostrar_autos(request):
     return render(request, 'MainApp/contentAuto.html')
 
 
-@role_login_required(allowed_roles=['customer'])
 def registrar_auto(request):
     return render(request, 'MainApp/registerAuto.html')
+
+def mostrar_estacion(request):
+    # Datos de ejemplo, estos datos deben provenir de tu base de datos
+    vehiculos = [
+        {
+            'placa': 'PDB-1856',
+            'especificaciones': 'Aceite sintético, 5W-30, 5 litros'
+        },
+        {
+            'placa': 'XYZ-1234',
+            'especificaciones': 'Aceite mineral, 10W-40, 4 litros'
+        }
+    ]
+
+    return render(request, 'MainApp/contentEstacion.html', {'vehiculos': vehiculos})
+

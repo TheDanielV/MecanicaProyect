@@ -1,0 +1,35 @@
+{% extends 'base/mecanicos.html' %}
+
+{% block content %}
+
+<!--Estacion de servicio-->
+<div class="container mt-5">
+    <div class="d-flex justify-content-between align-items-center mb-3">
+        <h1 class="mx-auto text-center font-weight-bold">
+            Estacion
+        </h1>
+    </div>
+
+    {% for vehiculo in vehiculos %}
+    <div class="card shadow mt-5 mx-auto" style="max-width: 800px;">
+        <div class="row g-0">
+            <div class="col-md-8">
+                <div class="card-body">
+                    <h5 class="card-title">Placa: {{ vehiculo.placa }}</h5>
+                    <h5 class="card-text mt-4">Especificaciones:</h5>
+                    <p class="card-text">{{ vehiculo.especificaciones }}</p>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <img
+                    src="https://upload.wikimedia.org/wikipedia/commons/d/d7/Commons_QR_code.png"
+                    class="img-fluid rounded-end"
+                    alt="QR Code"
+                />
+            </div>
+        </div>
+    </div>
+    {% endfor %}
+</div>
+
+{% endblock %}
