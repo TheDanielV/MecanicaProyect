@@ -18,25 +18,24 @@
         </button>
       </div>
 
-      <div class="card shadow mt-5 mx-auto w-80">
+  {% for auto in autos %}
+    <div class="card shadow mt-5 mx-auto w-80">
         <div class="row g-0">
-          <div class="col-md-4">
-            <img
-              src="https://cdn.pixabay.com/photo/2015/10/01/17/17/car-967387_1280.png"
-              class="img-fluid rounded-start"
-              alt="..."
-            />
-          </div>
-          <div class="col-md-8">
-            <div class="card-body">
-              <h5 class="card-text mt-2">Año:</h5>
-              <h5 class="card-text mt-4">Marca:</h5>
-              <h5 class="card-text mt-4">Modelo:</h5>
-              <h5 class="card-text mt-4">Placa:</h5>
+            <div class="col-md-4">
+                <img src="https://cdn.pixabay.com/photo/2015/10/01/17/17/car-967387_1280.png"
+                    class="img-fluid rounded-start" alt="..." />
             </div>
-          </div>
+            <div class="col-md-8">
+                <div class="card-body">
+                    <h5 class="card-text mt-2">Año: {{ auto.anio }}</h5>
+                    <h5 class="card-text mt-4">Marca: {{ auto.marca }}</h5>
+                    <h5 class="card-text mt-4">Modelo: {{ auto.model }}</h5>
+                    <h5 class="card-text mt-4">Placa: {{ auto.placa }}</h5>
+                </div>
+            </div>
         </div>
-      </div>
+    </div>
+    {% endfor %}
     </div>
 
 

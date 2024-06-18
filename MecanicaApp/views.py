@@ -85,7 +85,12 @@ def qr_page(request):
 
 @role_login_required(allowed_roles=['customer'])
 def mostrar_autos(request):
-    return render(request, 'MainApp/contentAuto.html')
+    try:
+        customer = Customer.objects.get(token=request.session['token'])
+        autos = Vehicle.objects.filter(customer=customer)
+        return render(request, 'MainApp/contentAuto.html', {'autos': autos})
+    except Customer.DoesNotExist:
+        return render(request, 'AuthViews/register.html')
 
 
 @role_login_required(allowed_roles=['customer'])
@@ -102,7 +107,7 @@ def registrar_auto(request):
             customer = Customer.objects.get(token=request.session['token'])
             vehiculo.create_auto(customer, marca, modelo, placa, anio, color)
             vehiculo.save(using='default')
-            return render(request, 'MainApp/contentAuto.html', {'vehicle_created': True})
+            return redirect("mostrarAutos")
         except Customer.DoesNotExist:
             return render(request, 'AuthViews/register.html')
     else:
