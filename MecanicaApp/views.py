@@ -5,7 +5,9 @@ from .utils import *
 from .models import *
 from django.db import IntegrityError
 from django.http import HttpResponse
+from django.contrib import messages
 from MecanicaApp.decorators import *
+from django.shortcuts import render, redirect, get_object_or_404
 
 AUTH_DATABASE = 'auth_db'
 LOG_DATABASE = 'log_db'
@@ -113,3 +115,17 @@ def registrar_auto(request):
     else:
         render(request, 'MainApp/registerAuto.html', {'error': 'Error al crear el vehículo'})
     return render(request, 'MainApp/registerAuto.html')
+
+@role_login_required(allowed_roles=['customer'])
+def eliminar_auto(request, auto_id):
+    try:
+        customer = Customer.objects.get(token=request.session['token'])
+        vehiculo = get_object_or_404(Vehicle, id=auto_id, customer=customer)
+        vehiculo.delete()
+        messages.success(request, 'El vehículo ha sido eliminado exitosamente.')
+    except Customer.DoesNotExist:
+        messages.error(request, 'Cliente no encontrado.')
+    except Vehicle.DoesNotExist:
+        messages.error(request, 'Vehículo no encontrado.')
+
+    return redirect('mostrarAutos')
