@@ -1,4 +1,4 @@
-{% extends 'base/base.html' %}
+{% extends 'base/inicio.html' %}
 
 {% load static %}
 
@@ -66,14 +66,18 @@
                 {{ form.email.label_tag }}
                 {{ form.email }}
               </div>
-              <button type="submit" class="btn btn-primary btn-block" style="background-color:#A62D43; border-color:#A62D43; margin-top: 10px;">
-                Registrarse
-              </button>
-
-                 <button type="button" class="btn btn-primary btn-block" onclick="window.location.href = '{% url 'login' %}'" style="background-color:#2C2F40; border-color:#2C2F40; color: white; margin-top: 10px;">
-  Cancelar
-</button>
-
+              <div class="row justify-content-center">
+                <div class="col-md-auto mb-3">
+                  <button type="submit" class="btn btn-primary" style="background-color:#A62D43; border-color:#A62D43;">
+                    Registrarse
+                  </button>
+                </div>
+                <div class="col-md-auto mb-3">
+                  <button type="button" class="btn btn-primary" onclick="window.location.href = '{% url 'login' %}'" style="background-color:#2C2F40; border-color:#2C2F40; color: white;">
+                    Cancelar
+                  </button>
+                </div>
+              </div>
             </form>
             <div>{{ error }}</div>
           </div>
@@ -85,14 +89,16 @@
 
 <script>
   function togglePasswordVisibility(button) {
-    var passwordField = button.parentNode.previousElementSibling.querySelector('input[type="password"]');
-    if (passwordField.type === "password") {
-      passwordField.type = "text";
-      button.textContent = "Ocultar Contraseña";
-    } else {
-      passwordField.type = "password";
-      button.textContent = "Mostrar Contraseña";
-    }
+    var passwordField = document.getElementById("id_password");
+
+    // Comprobar si el campo de contraseña es visible o no
+    var isPasswordVisible = (passwordField.type === "text");
+
+    // Cambiar el tipo de campo de contraseña
+    passwordField.type = isPasswordVisible ? "password" : "text";
+
+    // Cambiar el texto del botón
+    button.textContent = isPasswordVisible ? "Mostrar Contraseña" : "Ocultar Contraseña";
   }
 </script>
 
