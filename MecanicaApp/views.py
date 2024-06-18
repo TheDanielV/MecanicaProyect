@@ -9,7 +9,6 @@ from django.db import IntegrityError
 from django.http import HttpResponse
 from MecanicaApp.decorators import *
 
-
 AUTH_DATABASE = 'auth_db'
 LOG_DATABASE = 'log_db'
 
@@ -18,9 +17,12 @@ def index(request):
     title = "MecanicaApp"
     client_ip = request.META.get('REMOTE_ADDR')
     print(client_ip)
-    return render(request, 'index.html', {
-        'title': title
-    })
+    if request.session.get('token') is not None:
+        return redirect('mostrarAutos')
+    else:
+        return render(request, 'index.html', {
+            'title': title
+        })
 
 
 def register(request):
@@ -33,7 +35,9 @@ def register(request):
                 token = user.create_user(form.cleaned_data.get('user'),
                                          form.cleaned_data.get('password'),
                                          form.cleaned_data.get('email'))
-                customer.create(form.cleaned_data.get('name'), form.cleaned_data.get('last_name'), form.cleaned_data.get('ci'), form.cleaned_data.get('cellphone'),form.cleaned_data.get('direction'), token)
+                customer.create(form.cleaned_data.get('name'), form.cleaned_data.get('last_name'),
+                                form.cleaned_data.get('ci'), form.cleaned_data.get('cellphone'),
+                                form.cleaned_data.get('direction'), token)
                 user.save(using=AUTH_DATABASE)
                 customer.save(using='default')
                 return render(request, 'index.html', {
@@ -60,7 +64,7 @@ def login(request):
             print("a")
             if auth_key is not None:
                 request.session['token'] = auth_key
-                return redirect("qr")
+                return redirect("mostrarAutos")
             else:
                 return render(request, 'AuthViews/login.html', {'form': form, 'error': 'Invalid credentials'})
     else:
@@ -74,14 +78,14 @@ def qr_code_view(request):
     if request.session.get('role') == 'customer':
         person = Customer.get_customer(request.session.get('token'))
 
-    # secret_key = os.urandom(32)
-    img = generate_qr_code(serialize_object(person))
+    img = generate_qr_code(encrypt_serializer_object(serialize_object(person)))
     return HttpResponse(img.getvalue(), content_type="image/png")
 
 
 @role_login_required(allowed_roles=['customer'])
 def qr_page(request):
-    return render(request, 'MainApp/qrpagee.html', {'user': request.session.get('full_name')})
+    return render(request, 'MainApp/qrpagee.html',
+                  {'user': request.session.get('full_name'), 'role': request.session.get('role')})
 
 
 def mostrar_autos(request):
@@ -89,7 +93,25 @@ def mostrar_autos(request):
 
 
 def registrar_auto(request):
+    token = request.session.get('token')
+    vehiculo = Vehicle()
+    if request.method == 'POST':
+        anio = request.POST.get('año')
+        marca = request.POST.get('marca')
+        modelo = request.POST.get('modelo')
+        placa = request.POST.get('placa')
+        color = request.POST.get('color')
+        try:
+            customer = Customer.objects.get(token=request.session['token'])
+            vehiculo.create_auto(customer, marca, modelo, placa, anio, color)
+            vehiculo.save(using='default')
+            return render(request, 'MainApp/contentAuto.html', {'vehicle_created': True})
+        except Customer.DoesNotExist:
+            return render(request, 'AuthViews/register.html')
+    else:
+        render(request, 'MainApp/registerAuto.html', {'error': 'Error al crear el vehículo'})
     return render(request, 'MainApp/registerAuto.html')
+
 
 def mostrar_estacion(request):
     # Datos de ejemplo, estos datos deben provenir de tu base de datos

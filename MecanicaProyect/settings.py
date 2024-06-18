@@ -41,8 +41,10 @@ INSTALLED_APPS = [
     'MecanicaApp',
     'services.AuthService',
     'services.logs',
+    'channels',
 
 ]
+ASGI_APPLICATION = "MecanicaProyect.agsi.application"
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
@@ -151,4 +153,21 @@ MIGRATION_MODULES = {
     'admin': None,
 }
 
+
+CHANNEL_LAYERS = {
+    'default': {
+        'BACKEND': 'channels_redis.core.RedisChannelLayer',
+        'CONFIG': {
+            "hosts": [('127.0.0.1', 6379)],
+        },
+    },
+}
+
+# 4Email
+EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
+EMAIL_HOST = 'smtp.gmail.com'
+EMAIL_PORT = 587
+EMAIL_USE_TLS = True
+EMAIL_HOST_USER = 'm@gmail.com'
+EMAIL_HOST_PASSWORD = 'Ax1029FP$'
 

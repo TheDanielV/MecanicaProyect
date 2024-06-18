@@ -1,7 +1,5 @@
 /MecanicaApp/migrations/0003_session.py
 /MecanicaApp/migrations/0001_initial.py
-/MecanicaApp/migrations/0002_customer_delete_employee_delete_person.py
-/MecanicaApp/migrations/0004_admin_employee_delete_session_remove_customer_id_and_more.py
 /services/AuthService/migrations/0001_initial.py
 /services/AuthService/migrations/0003_authuser_token.py
 .idea/
