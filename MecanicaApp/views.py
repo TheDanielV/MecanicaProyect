@@ -1,7 +1,7 @@
 import os
 
 from django.shortcuts import render, redirect
-from .forms import registerForm, loginForm
+from .forms import *
 from services.AuthService.models import *
 from .utils import *
 from .models import *
@@ -88,10 +88,12 @@ def qr_page(request):
                   {'user': request.session.get('full_name'), 'role': request.session.get('role')})
 
 
+@role_login_required(allowed_roles=['customer'])
 def mostrar_autos(request):
     return render(request, 'MainApp/contentAuto.html')
 
 
+@role_login_required(allowed_roles=['customer'])
 def registrar_auto(request):
     token = request.session.get('token')
     vehiculo = Vehicle()
@@ -101,6 +103,7 @@ def registrar_auto(request):
         modelo = request.POST.get('modelo')
         placa = request.POST.get('placa')
         color = request.POST.get('color')
+        print(f'Entro en el controlador, datos: {anio} {placa}')
         try:
             customer = Customer.objects.get(token=request.session['token'])
             vehiculo.create_auto(customer, marca, modelo, placa, anio, color)
@@ -113,6 +116,7 @@ def registrar_auto(request):
     return render(request, 'MainApp/registerAuto.html')
 
 
+@role_login_required(allowed_roles=['employee'])
 def mostrar_estacion(request):
     # Datos de ejemplo, estos datos deben provenir de tu base de datos
     vehiculos = [
@@ -125,8 +129,61 @@ def mostrar_estacion(request):
             'especificaciones': 'Aceite mineral, 10W-40, 4 litros'
         }
     ]
-
     return render(request, 'MainApp/contentEstacion.html', {'vehiculos': vehiculos})
+
+
+def send_email_form(request):
+    if request.method == 'POST':
+        form = EmailForm(request.POST)
+
+        email = request.POST.get('email')
+        try:
+            passwordReset = PasswordReset()
+            token = passwordReset.get_remember_password_token(email)
+            send_token_email(email, token)
+            return redirect('enviarCorreo')
+        except Exception as e:
+            return render(request, 'AuthViews/emailInput.html', {'form': form, 'error': e})
+    else:
+        form = EmailForm()
+        return render(request, 'AuthViews/emailInput.html', {'form': form})
+
+
+def token_sended_test(request):
+    if request.method == 'POST':
+        form = tokenForm(request.POST)
+
+        token = request.POST.get('token')
+        try:
+            passwordReset = PasswordReset()
+            token_user = passwordReset.update_password_with_token(token)
+            request.session['password_confirmation'] = token_user
+            return redirect('confirmarContrasenia')
+        except Exception as e:
+            return render(request, 'AuthViews/tokenInput.html', {'form': form, 'error': e})
+    else:
+        form = tokenForm()
+        return render(request, 'AuthViews/tokenInput.html', {'form': form})
+
+
+def password_confirmation(request):
+    if request.method == 'POST':
+        form = passwordForm(request.POST)
+        token_user = request.session.get('password_confirmation')
+        password = request.POST.get('password')
+        password_cofirm = request.POST('password_confirmation')
+        if password_cofirm != password:
+            try:
+                auth_user = AuthUser()
+                auth_user.update_password(token=token_user, password=password)
+                return redirect('index')
+            except Exception as e:
+                return render(request, 'AuthViews/tokenInput.html', {'form': form, 'error': e})
+        else:
+            return render(request, 'AuthViews/tokenInput.html', {'form': form})
+    else:
+        form = passwordForm()
+        return render(request, 'AuthViews/tokenInput.html', {'form': form})
 
 def ordenar_servicio(request):
     return render(request, 'MainApp/orderServicio.html')

@@ -6,7 +6,7 @@ from datetime import timedelta
 from django.db import models
 import hashlib
 from django.db import IntegrityError
-
+from .utils import send_token_email
 from django.utils import timezone
 
 
@@ -27,13 +27,20 @@ class AuthUser(models.Model):
             self.token = str(uuid.uuid4())
             return self.token
 
-    def update_password(self, token, password):
-        auth_user = self.objects.get(token=token)
-        if self.is_a_valid_password(password):
-            auth_user.password = self.hashed_password(password)
-            self.save()
-        else:
-            return Exception("Contraseña inválida")
+    @classmethod
+    def update_password(cls, token, password):
+        try:
+            user = cls.objects.get(token=token)
+            if cls.is_a_valid_password(password):
+                user.password = cls.hashed_password(password)
+                user.save()
+                return True
+            else:
+                raise ValueError("Contraseña inválida")
+        except cls.DoesNotExist:
+            raise ValueError("Usuario con el token proporcionado no existe")
+        except Exception as e:
+            raise e
 
     @classmethod
     def is_authorized(cls, username, password):
@@ -71,35 +78,47 @@ class PasswordReset(models.Model):
     token = models.CharField(max_length=100, unique=True, null=False, default="00000")
     created_at = models.DateTimeField(default=timezone.now)
 
-    def get_remember_password_token(self, email):
-        password_reset = PasswordReset()
-        if AuthUser.objects.get(email=email) is not None:
-            self.email = email
-            self.token = secrets.token_urlsafe(32)
-        else:
-            return Exception("El email no pertenece a un usuario")
+    @classmethod
+    def get_remember_password_token(cls, email):
         try:
-            self.save()
-            # TODO: Enviar el Token por correo
-            # TODO: Logs para almacenar el cambio de contraseña
-        except IntegrityError as e:
-            return Exception("Error al generar el token")
+            user = AuthUser.objects.get(email=email)
+            password_reset = cls(email=email, token=secrets.token_urlsafe(5))
+            if send_token_email(password_reset.email, password_reset.token):
+                password_reset.save()
+                return password_reset
+            else:
+                raise Exception("Fallo al enviar el correo")
+        except AuthUser.DoesNotExist:
+            raise Exception("El email no pertenece a un usuario")
+        except IntegrityError:
+            raise Exception("Error al generar el token")
 
-    def update_password_with_token(self, token):
-        if self.is_the_token_expired(token):
-            token = PasswordReset.objects.get(token=token)
-            token.delete()
-            return Exception("el token expiró")
-        else:
-            passwordReset = PasswordReset.objects.get(token=token)
-            return AuthUser.objects.get(email=passwordReset.email).token
+    @classmethod
+    def update_password_with_token(cls, token):
+        try:
+            if cls.is_the_token_expired(token):
+                cls.objects.get(token=token).delete()
+                raise Exception("El token expiró")
+            else:
+                password_reset = cls.objects.get(token=token)
+                return AuthUser.objects.get(email=password_reset.email).token
+        except PasswordReset.DoesNotExist:
+            raise Exception("Token no válido o ya usado")
+        except AuthUser.DoesNotExist:
+            raise Exception("Usuario no encontrado")
+        except PasswordReset.DoesNotExist:
+            raise Exception("Token incorrecto o inválido")
 
-    def is_the_token_expired(self, token):
-        passwordRemember = self.objects.get(token=token)
-        if timezone.now() > passwordRemember.created_at + timedelta(minutes=5):
+    @classmethod
+    def is_the_token_expired(cls, token):
+        try:
+            password_remember = cls.objects.get(token=token)
+            if timezone.now() > password_remember.created_at + timedelta(minutes=5):
+                return True
+            else:
+                return False
+        except cls.DoesNotExist:
             return True
-        else:
-            return False
 
 
 class InvalidPassword(Exception):

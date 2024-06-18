@@ -1,5 +1,5 @@
 from django.test import TestCase
-from services.AuthService.models import AuthUser,InvalidPassword
+from services.AuthService.models import AuthUser, InvalidPassword, PasswordReset
 
 
 # Create your tests here.
@@ -9,3 +9,4 @@ class AuthUserTestCase(TestCase):
         test_instance = AuthUser()
         with self.assertRaises(InvalidPassword):
             test_instance.create_user("Daniel", "1234", "test@email.com")
+
