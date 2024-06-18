@@ -58,3 +58,22 @@ class Employee(Person):
     station = models.ForeignKey(Station, on_delete=models.CASCADE, related_name='employees')
 
 
+class Service(models.Model):
+    station = models.ForeignKey(Station, on_delete=models.CASCADE, related_name='servicios')
+    name = models.CharField(max_length=255)
+    description = models.TextField()
+
+
+class Order(models.Model):
+    customer = models.ForeignKey(Customer, on_delete=models.CASCADE, related_name='ordenes')
+    vehicle = models.ForeignKey(Vehicle, on_delete=models.CASCADE, related_name='ordenes')
+    service = models.ManyToManyField(Service, related_name='ordenes')
+
+    #  payment = models.CharField(max_length=2, choices=METODO_PAGO_CHOICES)
+
+    def create(self, customer, vehicle):
+        self.customer = customer
+        self.vehicle = vehicle
+
+    def __str__(self):
+        return f'Orden de {self.customer.name} para {self.vehicle.placa}'
