@@ -179,8 +179,8 @@ def password_confirmation(request):
         form = passwordForm(request.POST)
         token_user = request.session.get('password_confirmation')
         password = request.POST.get('password')
-        password_cofirm = request.POST('password_confirmation')
-        if password_cofirm != password:
+        password_cofirm = request.POST.get('password_confirmation')
+        if password_cofirm == password:
             try:
                 auth_user = AuthUser()
                 auth_user.update_password(token=token_user, password=password)
