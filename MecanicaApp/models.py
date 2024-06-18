@@ -39,11 +39,22 @@ class Customer(Person):
         return Customer.objects.get(token=token)
 
 
+
 class Vehicle(models.Model):
     customer = models.ForeignKey(Customer, on_delete=models.CASCADE, related_name='vehicles', default="0000000000")
     marca = models.CharField(max_length=255, default=None)
     model = models.CharField(max_length=255, default=None)
     placa = models.CharField(max_length=30, default=None)
+
+    def create(self, customer, marca, model, placa):
+        self.customer = customer
+        self.marca = marca
+        self.model = model
+        self.placa = placa
+
+    @staticmethod
+    def delete_vehicle(placa):
+        Vehicle.objects.get(placa=placa).delete()
 
 
 class Admin(Person):
