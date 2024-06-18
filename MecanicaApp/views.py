@@ -8,7 +8,6 @@ from .utils import *
 from .models import *
 from django.db import IntegrityError
 from django.http import HttpResponse
-from django.contrib import messages
 from MecanicaApp.decorators import *
 from django.shortcuts import render, redirect, get_object_or_404
 
@@ -213,3 +212,6 @@ def eliminar_auto(request, auto_id):
 def logout_user(request):
     logout(request)
     return redirect('index')
+
+def ordenar_servicio(request):
+    return render(request, 'MainApp/orderServicio.html')
