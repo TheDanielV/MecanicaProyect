@@ -37,7 +37,7 @@
                 <input type="text" class="form-control mt-2" id="color" name="color" placeholder="Ingrese el color" required>
             </div>
 
-               <div class="text-center mt-4">
+            <div class="text-center mt-4">
             <button type="button" class="btn btn-lg" style="background-color:#A62D43; border-color:#A62D43; color:#fff;" onclick="mostrarAlerta()">Registrar</button>
         </div>
         </form>
@@ -47,22 +47,46 @@
     
 
    
-<script>
-    function mostrarAlerta() {
-        Swal.fire({
-            title: '¡Ingreso correctamente!',
-            icon: 'success',
-            confirmButtonText: 'Aceptar',
-            customClass: {
-                confirmButton: 'swal2-confirm'
+
+  <script>
+        function mostrarAlerta() {
+            // Obtener todos los campos requeridos del formulario
+            const campos = document.querySelectorAll('#formularioAutos [required]');
+
+            // Verificar si todos los campos requeridos están llenos
+            let todosLlenos = true;
+            campos.forEach((campo) => {
+                if (!campo.value) {
+                    todosLlenos = false;
+                }
+            });
+
+            // Si todos los campos están llenos, mostrar la alerta
+            if (todosLlenos) {
+                Swal.fire({
+                    title: '¡Ingreso correctamente!',
+                    icon: 'success',
+                    confirmButtonText: 'Aceptar',
+                    customClass: {
+                        confirmButton: 'swal2-confirm'
+                    }
+                }).then((result) => {
+                    if (result.isConfirmed) {
+                        // Envía el formulario después de que el usuario cierra la alerta
+                        document.getElementById('formularioAutos').submit();
+                    }
+                });
+            } else {
+                Swal.fire({
+                    title: 'Por favor, completa todos los campos.',
+                    icon: 'warning',
+                    confirmButtonText: 'Aceptar',
+                    customClass: {
+                        confirmButton: 'swal2-confirm'
+                    }
+                });
             }
-        }).then((result) => {
-            if (result.isConfirmed) {
-                // Envía el formulario después de que el usuario cierra la alerta
-                document.getElementById('formularioAutos').submit();
-            }
-        });
-    }
-</script>
-    
+        }
+    </script>
+
 {% endblock %}
