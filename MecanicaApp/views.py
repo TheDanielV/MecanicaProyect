@@ -7,7 +7,9 @@ from .utils import *
 from .models import *
 from django.db import IntegrityError
 from django.http import HttpResponse
+from django.contrib import messages
 from MecanicaApp.decorators import *
+from django.shortcuts import render, redirect, get_object_or_404
 
 AUTH_DATABASE = 'auth_db'
 LOG_DATABASE = 'log_db'
@@ -90,7 +92,12 @@ def qr_page(request):
 
 @role_login_required(allowed_roles=['customer'])
 def mostrar_autos(request):
-    return render(request, 'MainApp/contentAuto.html')
+    try:
+        customer = Customer.objects.get(token=request.session['token'])
+        autos = Vehicle.objects.filter(customer=customer)
+        return render(request, 'MainApp/contentAuto.html', {'autos': autos})
+    except Customer.DoesNotExist:
+        return render(request, 'AuthViews/register.html')
 
 
 @role_login_required(allowed_roles=['customer'])
@@ -108,7 +115,7 @@ def registrar_auto(request):
             customer = Customer.objects.get(token=request.session['token'])
             vehiculo.create_auto(customer, marca, modelo, placa, anio, color)
             vehiculo.save(using='default')
-            return render(request, 'MainApp/contentAuto.html', {'vehicle_created': True})
+            return redirect("mostrarAutos")
         except Customer.DoesNotExist:
             return render(request, 'AuthViews/register.html')
     else:
@@ -184,3 +191,17 @@ def password_confirmation(request):
     else:
         form = passwordForm()
         return render(request, 'AuthViews/tokenInput.html', {'form': form})
+
+@role_login_required(allowed_roles=['customer'])
+def eliminar_auto(request, auto_id):
+    try:
+        customer = Customer.objects.get(token=request.session['token'])
+        vehiculo = get_object_or_404(Vehicle, id=auto_id, customer=customer)
+        vehiculo.delete()
+        messages.success(request, 'El vehículo ha sido eliminado exitosamente.')
+    except Customer.DoesNotExist:
+        messages.error(request, 'Cliente no encontrado.')
+    except Vehicle.DoesNotExist:
+        messages.error(request, 'Vehículo no encontrado.')
+
+    return redirect('mostrarAutos')
