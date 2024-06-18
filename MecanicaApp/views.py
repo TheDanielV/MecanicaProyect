@@ -1,5 +1,7 @@
 import os
 
+from django.contrib import messages
+from django.contrib.auth import logout
 from django.shortcuts import render, redirect
 from .forms import *
 from services.AuthService.models import *
@@ -90,7 +92,12 @@ def qr_page(request):
 
 @role_login_required(allowed_roles=['customer'])
 def mostrar_autos(request):
-    return render(request, 'MainApp/contentAuto.html')
+    try:
+        customer = Customer.objects.get(token=request.session['token'])
+        autos = Vehicle.objects.filter(customer=customer)
+        return render(request, 'MainApp/contentAuto.html', {'autos': autos})
+    except Customer.DoesNotExist:
+        return render(request, 'AuthViews/register.html')
 
 
 @role_login_required(allowed_roles=['customer'])
@@ -108,7 +115,7 @@ def registrar_auto(request):
             customer = Customer.objects.get(token=request.session['token'])
             vehiculo.create_auto(customer, marca, modelo, placa, anio, color)
             vehiculo.save(using='default')
-            return render(request, 'MainApp/contentAuto.html', {'vehicle_created': True})
+            return redirect("mostrarAutos")
         except Customer.DoesNotExist:
             return render(request, 'AuthViews/register.html')
     else:
@@ -171,12 +178,13 @@ def password_confirmation(request):
         form = passwordForm(request.POST)
         token_user = request.session.get('password_confirmation')
         password = request.POST.get('password')
-        password_cofirm = request.POST('password_confirmation')
-        if password_cofirm != password:
+        password_cofirm = request.POST.get('password_confirmation')
+        if password_cofirm == password:
             try:
                 auth_user = AuthUser()
                 auth_user.update_password(token=token_user, password=password)
-                return redirect('index')
+                logout_user(request)
+                return redirect('login')
             except Exception as e:
                 return render(request, 'AuthViews/tokenInput.html', {'form': form, 'error': e})
         else:
@@ -184,6 +192,26 @@ def password_confirmation(request):
     else:
         form = passwordForm()
         return render(request, 'AuthViews/tokenInput.html', {'form': form})
+
+
+@role_login_required(allowed_roles=['customer'])
+def eliminar_auto(request, auto_id):
+    try:
+        customer = Customer.objects.get(token=request.session['token'])
+        vehiculo = get_object_or_404(Vehicle, id=auto_id, customer=customer)
+        vehiculo.delete()
+        messages.success(request, 'El vehículo ha sido eliminado exitosamente.')
+    except Customer.DoesNotExist:
+        messages.error(request, 'Cliente no encontrado.')
+    except Vehicle.DoesNotExist:
+        messages.error(request, 'Vehículo no encontrado.')
+
+    return redirect('mostrarAutos')
+
+
+def logout_user(request):
+    logout(request)
+    return redirect('index')
 
 def ordenar_servicio(request):
     return render(request, 'MainApp/orderServicio.html')

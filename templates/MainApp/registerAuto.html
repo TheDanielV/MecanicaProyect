@@ -4,11 +4,6 @@
 <div class="container mt-5">
     <h1 class="text-center">Registrar Vehículo</h1>
 
-        <div class="container mt-4 d-flex justify-content-center">
-
-        <!-- Formulario Registro de Vehiculo-->
-        <form id="formularioAutos" method="post" action='{% url 'mostrarAutos' %}' class="w-50">
-            {% csrf_token %}
     <div class="container mt-4 d-flex justify-content-center">
         <form method="post" action="{% url 'registrarAuto' %}" class="w-50">
             {% csrf_token %}
@@ -38,67 +33,10 @@
             </div>
 
             <div class="text-center mt-4">
-            <button type="button" class="btn btn-lg" style="background-color:#A62D43; border-color:#A62D43; color:#fff;" onclick="mostrarAlerta()">Registrar</button>
-        </div>
                 <button type="submit" class="btn btn-lg" style="background-color:#A62D43; border-color:#A62D43; color:#fff">Registrar</button>
             </div>
         </form>
-
     </div>
-<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 
-
-    {% if vehicle_created %}
-    <script>
-        Swal.fire({
-            icon: 'success',
-            title: 'Éxito',
-            text: 'El vehículo ha sido creado exitosamente'
-        });
-    </script>
-    {% endif %}
 </div>
-
-
-  <script>
-        function mostrarAlerta() {
-            // Obtener todos los campos requeridos del formulario
-            const campos = document.querySelectorAll('#formularioAutos [required]');
-
-            // Verificar si todos los campos requeridos están llenos
-            let todosLlenos = true;
-            campos.forEach((campo) => {
-                if (!campo.value) {
-                    todosLlenos = false;
-                }
-            });
-
-            // Si todos los campos están llenos, mostrar la alerta
-            if (todosLlenos) {
-                Swal.fire({
-                    title: '¡Ingreso correctamente!',
-                    icon: 'success',
-                    confirmButtonText: 'Aceptar',
-                    customClass: {
-                        confirmButton: 'swal2-confirm'
-                    }
-                }).then((result) => {
-                    if (result.isConfirmed) {
-                        // Envía el formulario después de que el usuario cierra la alerta
-                        document.getElementById('formularioAutos').submit();
-                    }
-                });
-            } else {
-                Swal.fire({
-                    title: 'Por favor, completa todos los campos.',
-                    icon: 'warning',
-                    confirmButtonText: 'Aceptar',
-                    customClass: {
-                        confirmButton: 'swal2-confirm'
-                    }
-                });
-            }
-        }
-    </script>
-
 {% endblock %}

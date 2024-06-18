@@ -11,12 +11,16 @@ urlpatterns = [
     path('generate_qr/', views.qr_code_view, name='generate_qr'),
     path('login/', views.login, name='login'),
     path("mostrarAutos/", views.mostrar_autos, name="mostrarAutos"),
-    path("ordenarServicio/", views.ordenar_servicio, name="ordenarServicio"),
     path("registrarAuto/", views.registrar_auto, name="registrarAuto"),
     path("mostrarEstacion/", views.mostrar_estacion, name="mostrarEstacion"),
     path("enviarCorreo/",views.token_sended_test, name="enviarCorreo"),
     path("recuperarContraseña/",views.send_email_form, name="recuperarContraseña"),
     path("confirmarContrasenia/", views.password_confirmation, name="confirmarContrasenia"),
+
+    path("registrarAuto/",views.registrar_auto,name="registrarAuto"),
+    path('eliminarAuto/<int:auto_id>/', views.eliminar_auto, name='eliminarAuto'),
+    path('logout/', views.logout_user, name='logout'),
+    path("ordenarServicio/", views.ordenar_servicio, name="ordenarServicio"),
 
 
 ]
