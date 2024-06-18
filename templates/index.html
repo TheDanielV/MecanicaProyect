@@ -1,11 +1,155 @@
-{% extends 'base/base.html' %}
+{% extends 'base/inicio.html' %}
 
 {% load static %}
 
 {% block content %}
+    
+    <div class="container-fluid p-0">
 
-<h1>{{title}}</h1>
-<img src="{% static 'descarga.jfif' %}" alt="">
-<p>Lorem ipsum dolor sit amet consectetur adipisicing elit. Vero, pariatur molestias enim quidem debitis aliquid vitae. Ex enim consectetur esse itaque quibusdam natus architecto assumenda numquam voluptatibus? Ex, quisquam labore!</p>
+    <div class="jumbotron jumbotron-custom text-center mb-0 animated-jumbotron" style="background-color: #D9C49C;">
+        <div class="jumbotron-content">
+            <h1 class="display-4 animated-title">MecHelp</h1>
+            <p class="lead text-center animated-text">En MecHelp nos especializamos en proporcionar servicios de mecánica confiables y eficientes para satisfacer todas tus necesidades automotrices. Con años de experiencia en el campo, nuestro equipo de expertos está comprometido a ofrecerte un servicio de calidad que garantice el rendimiento óptimo de tu vehículo.</p>
+        </div>
+    </div>
+
+    <div class="container my-5">
+        <h2 class="text-center service-title mb-4 animated-title">Nuestros Servicios</h2>
+        <div class="row">
+            <div class="col-md-4 text-center">
+                <img src="https://www.talleresautomotrices.com/wp-content/uploads/2021/04/La-importancia-del-cambio-de-aceite.jpg" class="rounded-circle img-fluid animated-image service-image" alt="Cambio de Aceite">
+                <h3 class="mt-3 animated-subtitle">Cambio de aceite</h3>
+                <p class="animated-text">Mantén tu motor en óptimas condiciones con nuestro servicio de cambio de aceite, incluyendo filtro y aceite de calidad.</p>
+            </div>
+            <div class="col-md-4 text-center">
+                <img src="https://static.patiotuerca.com/ghost/uploads/sites/4/2018/01/23161747/Alineacion-y-balanceo.jpg" class="rounded-circle img-fluid animated-image service-image" alt="Alineación y Balanceo">
+                <h3 class="mt-3 animated-subtitle">Alineación y Balanceo</h3>
+                <p class="animated-text">Mejora la estabilidad y durabilidad de tus neumáticos con nuestra alineación y balanceo precisos.</p>
+            </div>
+            <div class="col-md-4 text-center">
+                <img src="https://i1.wp.com/revistaroadone.com/wp-content/uploads/2018/09/consejos_motul_1.jpg?fit=540%2C360&ssl=1" class="rounded-circle img-fluid animated-image service-image" alt="ABC de motor">
+                <h3 class="mt-3 animated-subtitle">ABC de motor</h3>
+                <p class="animated-text">Afinación, balanceo y calibración para maximizar el rendimiento y eficiencia de tu motor.</p>
+            </div>
+        </div>
+    </div>
+
+    <div class="container my-5">
+        <h2 class="text-center mb-4 animated-title">Nuestro Video</h2>
+        <div class="row justify-content-center">
+            <div class="col-md-8 text-center">
+                <div class="embed-responsive embed-responsive-16by9">
+                    <iframe class="embed-responsive-item" src="https://www.youtube.com/embed/EDSTDHU6oFI" allowfullscreen></iframe>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+</div>
+
+<style>
+    .jumbotron-custom {
+        background-color: #D9C49C;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+    }
+
+    .jumbotron-content {
+        max-width: 800px;
+        width: 100%;
+        padding: 20px;
+    }
+
+    .jumbotron-custom .lead,
+    .jumbotron-custom p {
+        text-align: center;
+    }
+
+    .service-image {
+        width: 150px;
+        height: 150px;
+        object-fit: cover;
+        border-radius: 50%;
+        margin: auto;
+    }
+
+    .animated-image {
+        animation: fadeIn 2s;
+    }
+
+    .animated-title {
+        animation: slideInDown 1s;
+    }
+
+    .animated-subtitle {
+        animation: slideInUp 1s;
+    }
+
+    .animated-text {
+        animation: fadeIn 2s;
+    }
+
+    .animated-jumbotron {
+        animation: zoomIn 1.5s;
+    }
+
+    @keyframes fadeIn {
+        0% { opacity: 0; }
+        100% { opacity: 1; }
+    }
+
+    @keyframes slideInDown {
+        0% {
+            transform: translateY(-100%);
+            opacity: 0;
+        }
+        100% {
+            transform: translateY(0);
+            opacity: 1;
+        }
+    }
+
+    @keyframes slideInUp {
+        0% {
+            transform: translateY(100%);
+            opacity: 0;
+        }
+        100% {
+            transform: translateY(0);
+            opacity: 1;
+        }
+    }
+
+    @keyframes zoomIn {
+        0% {
+            transform: scale(0);
+            opacity: 0;
+        }
+        100% {
+            transform: scale(1);
+            opacity: 1;
+        }
+    }
+
+    .embed-responsive-16by9 {
+        position: relative;
+        display: block;
+        width: 100%;
+        padding: 0;
+        overflow: hidden;
+        padding-top: 56.25%;
+    }
+
+    .embed-responsive-item {
+        position: absolute;
+        top: 0;
+        bottom: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        border: 0;
+    }
+</style>
 
 {% endblock %}
