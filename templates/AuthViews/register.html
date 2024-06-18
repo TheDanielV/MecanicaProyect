@@ -1,34 +1,99 @@
 {% extends 'base/base.html' %}
 
+{% load static %}
+
 {% block content %}
 
+<div class="jumbotron">
+  <div class="container">
+    <div class="row align-items-center">
+      <div class="col-md-6">
+        <div class="row align-items-center">
+          <div class="col-md-3">
+            <img src="https://lubricadoratarquino.com/wp-content/uploads/2021/08/logo-tarquino_Mesa-de-trabajo-1.png" alt="" class="img-fluid">
+          </div>
+          <div class="col-md-9">
+            <h1 class="display-4">¡Bienvenido!</h1>
+            <p class="lead">Gracias por visitar nuestra página.</p>
+            <hr class="my-4">
+          </div>
+        </div>
+      </div>
+      <div class="col-md-6">
+        <div class="card">
+          <div class="card-header text-center">
+            <h3>Registro</h3>
+          </div>
+          <div class="card-body">
+            <form method="post">
+              {% csrf_token %}
+              <div class="form-group">
+                {{ form.user.label_tag }}
+                {{ form.user }}
+              </div>
+              <div class="form-group">
+                {{ form.password.label_tag }}
+                <div class="input-group">
+                  {{ form.password }}
+                  <div class="input-group-append">
+                    <button type="button" class="btn btn-secondary" onclick="togglePasswordVisibility(this)">
+                      Mostrar Contraseña
+                    </button>
+                  </div>
+                </div>
+              </div>
+              <div class="form-group">
+                {{ form.name.label_tag }}
+                {{ form.name }}
+              </div>
+              <div class="form-group">
+                {{ form.last_name.label_tag }}
+                {{ form.last_name }}
+              </div>
+              <div class="form-group">
+                {{ form.cellphone.label_tag }}
+                {{ form.cellphone }}
+              </div>
+              <div class="form-group">
+                {{ form.ci.label_tag }}
+                {{ form.ci }}
+              </div>
+              <div class="form-group">
+                {{ form.direction.label_tag }}
+                {{ form.direction }}
+              </div>
+              <div class="form-group">
+                {{ form.email.label_tag }}
+                {{ form.email }}
+              </div>
+              <button type="submit" class="btn btn-primary btn-block" style="background-color:#A62D43; border-color:#A62D43; margin-top: 10px;">
+                Registrarse
+              </button>
 
-<div class="text-center"><h1>Register</h1></div>
-<div class="d-flex justify-content-center">
-<form method="POST">
-    {% csrf_token %}
-    {{form.as_p}}
-        <button  class="btn btn-primary">
-        Registrarse
-    </button>
-    <button type="button" class="btn btn-secundary" id="togglePassword" onclick="togglePasswordVisibility()">Mostrar Contraseña</button>
+                 <button type="button" class="btn btn-primary btn-block" onclick="window.location.href = '{% url 'login' %}'" style="background-color:#2C2F40; border-color:#2C2F40; color: white; margin-top: 10px;">
+  Cancelar
+</button>
 
-
-</form>
+            </form>
+            <div>{{ error }}</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
 </div>
-    <p>{{error}}</p>
 
-    <script>
-        function togglePasswordVisibility() {
-            var passwordField = document.getElementById("id_password");
-            var toggleButton = document.getElementById("togglePassword");
-            if (passwordField.type === "password") {
-                passwordField.type = "text";
-                toggleButton.textContent = "Ocultar Contraseña";
-            } else {
-                passwordField.type = "password";
-                toggleButton.textContent = "Mostrar Contraseña";
-            }
-        }
-    </script>
+<script>
+  function togglePasswordVisibility(button) {
+    var passwordField = button.parentNode.previousElementSibling.querySelector('input[type="password"]');
+    if (passwordField.type === "password") {
+      passwordField.type = "text";
+      button.textContent = "Ocultar Contraseña";
+    } else {
+      passwordField.type = "password";
+      button.textContent = "Mostrar Contraseña";
+    }
+  }
+</script>
+
 {% endblock %}
