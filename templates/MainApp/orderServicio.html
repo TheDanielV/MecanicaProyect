@@ -1,0 +1,115 @@
+{% extends 'base/autos.html' %}
+
+{% block content %}
+
+<h1 class="mt-5 text-center">Orden de Servicio</h1>
+
+<div class="container mt-4 d-flex justify-content-center">
+
+    <!-- Formulario Registro de Vehiculo-->
+    <form id="formularioServicio" method="post" action='{% url 'ordenarServicio' %}' class="w-50">
+        {% csrf_token %}
+
+        <!-- Información del vehículo en una tarjeta -->
+        <div class="card mb-4" style="background-color: #F8E5E9; border-color: #A62D43;">
+            <div class="card-header" style="background-color: #A62D43; color: white;">
+                Información del Vehículo
+            </div>
+            <div class="card-body">
+                <p class="card-text"><strong>Año:</strong> 2008</p>
+                <p class="card-text"><strong>Marca:</strong> Chevrolet</p>
+                <p class="card-text"><strong>Modelo:</strong> Aveo</p>
+                <p class="card-text"><strong>Placa:</strong> PDB-1856</p>
+                <p class="card-text"><strong>Color:</strong> Plata</p>
+            </div>
+        </div>
+
+        <!-- Información del vehículo (datos ocultos) -->
+        <input type="hidden" id="año" name="año" value="2008">
+        <input type="hidden" id="marca" name="marca" value="Chevrolet">
+        <input type="hidden" id="modelo" name="modelo" value="Aveo">
+        <input type="hidden" id="placa" name="placa" value="PDB-1856">
+        <input type="hidden" id="color" name="color" value="Plata">
+
+        <!-- Sección de selección de servicios -->
+        <div class="form-group mb-3">
+            <label for="servicios" class="form-label"><strong>Seleccione los servicios deseados:</strong></label>
+           
+            <div id="servicios">
+                <div class="form-check mb-2" style="padding-left: 1.5em;">
+                    <input class="form-check-input" type="checkbox" value="Cambio de aceite" id="cambioAceite" name="servicios">
+                    <label class="form-check-label" for="cambioAceite">
+                        Cambio de aceite
+                    </label>
+                </div>
+                <div class="form-check mb-2" style="padding-left: 1.5em;">
+                    <input class="form-check-input" type="checkbox" value="Alineación y balanceo" id="alineacionBalanceo" name="servicios">
+                    <label class="form-check-label" for="alineacionBalanceo">
+                        Alineación y balanceo
+                    </label>
+                </div>
+                <div class="form-check mb-2" style="padding-left: 1.5em;">
+                    <input class="form-check-input" type="checkbox" value="ABC de motor" id="abcMotor" name="servicios">
+                    <label class="form-check-label" for="abcMotor">
+                        ABC de motor
+                    </label>
+                </div>
+                <!-- Añadir más servicios según sea necesario -->
+            </div>
+        </div>
+
+        <div class="text-center mt-4">
+            <button type="button" class="btn btn-lg" style="background-color:#A62D43; border-color:#A62D43; color:#fff;" onclick="mostrarAlerta()">Generar Orden</button>
+        </div>
+    </form>
+
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
+<script>
+    function mostrarAlerta() {
+        const campos = document.querySelectorAll('#formularioServicio [required]');
+
+        let todosLlenos = true;
+        campos.forEach((campo) => {
+            if (!campo.value) {
+                todosLlenos = false;
+            }
+        });
+
+        const servicios = document.querySelectorAll('#servicios input[type="checkbox"]');
+        let algunServicioSeleccionado = false;
+        servicios.forEach((servicio) => {
+            if (servicio.checked) {
+                algunServicioSeleccionado = true;
+            }
+        });
+
+        if (todosLlenos && algunServicioSeleccionado) {
+            Swal.fire({
+                title: '¡Orden generada correctamente!',
+                icon: 'success',
+                confirmButtonText: 'Aceptar',
+                customClass: {
+                    confirmButton: 'swal2-confirm'
+                }
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    document.getElementById('formularioServicio').submit();
+                }
+            });
+        } else {
+            Swal.fire({
+                title: 'Por favor, completa todos los campos y selecciona al menos un servicio.',
+                icon: 'warning',
+                confirmButtonText: 'Aceptar',
+                customClass: {
+                    confirmButton: 'swal2-confirm'
+                }
+            });
+        }
+    }
+</script>
+
+{% endblock %}

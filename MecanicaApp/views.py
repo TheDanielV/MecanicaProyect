@@ -106,3 +106,5 @@ def mostrar_estacion(request):
 
     return render(request, 'MainApp/contentEstacion.html', {'vehiculos': vehiculos})
 
+def ordenar_servicio(request):
+    return render(request, 'MainApp/orderServicio.html')
