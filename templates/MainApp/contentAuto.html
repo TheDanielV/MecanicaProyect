@@ -1,0 +1,67 @@
+{% extends 'base/autos.html' %}
+
+{% block content %}
+
+<!--MIS AUTOS-->
+<div class="container mt-5">
+  <div class="d-flex justify-content-between align-items-center mb-3">
+    <h1 class="mx-auto text-center font-weight-bold">
+      Mis Autos
+    </h1>
+    <button class="btn btn-lg" onclick="window.location.href = '{% url 'registrarAuto' %}'
+          " style="background-color:#A62D43; border-color:#A62D43; color:#ffff">
+      Registrar vehículo
+    </button>
+  </div>
+
+  {% for auto in autos %}
+  <div class="row ">
+    <div class="col-12 col-md-8 offset-md-2 mb-3">
+        <div class="card shadow">
+            <div class="card-body">
+                <h5 class="card-title text-center" style="font-size: 22px;">Especificaciones</h5>
+                <div class="row">
+                    <div class="col-4">
+                        <p class="text-center mt-3">Placa:</p>
+                        <p class="placa bg-light p-3 mt-3 text-center" style="font-size: 24px;
+            font-weight: bold;">{{ auto.placa }}</p>
+                    </div>
+                    <div class="col-8 mt-3">
+                        <p>Año: {{ auto.anio }} </p>
+                        <p>Marca: {{ auto.marca }}</p>
+                        <p>Modelo: {{ auto.modelo }}</p>
+                        <button class="btn btn-danger mt-4" onclick="confirmDeletion({{ auto.id }})">
+                            Eliminar
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+  {% endfor %}
+
+  <script>
+    function confirmDeletion(vehiculoId) {
+      Swal.fire({
+        title: '¿Estás seguro?',
+        text: "Esta acción no se puede deshacer",
+        icon: 'warning',
+        showCancelButton: true,
+        confirmButtonColor: '#3085d6',
+        cancelButtonColor: '#d33',
+        confirmButtonText: 'Sí, eliminar'
+      }).then((result) => {
+        if (result.isConfirmed) {
+          window.location.href = "{% url 'eliminarAuto' auto_id=0 %}".replace('0', vehiculoId);
+        }
+      });
+    }
+  </script>
+</div>
+
+
+
+
+
+{% endblock %}

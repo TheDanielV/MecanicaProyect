@@ -1,5 +1,7 @@
 from functools import wraps
 from django.http import JsonResponse
+from django.shortcuts import redirect
+
 from .models import Customer, Admin
 
 def role_login_required(allowed_roles=None):
@@ -11,7 +13,7 @@ def role_login_required(allowed_roles=None):
         def _wrapped_view(request, *args, **kwargs):
             token = request.session.get('token')
             if not token:
-                return JsonResponse({'error': 'No username provided'}, status=400)
+                return redirect('index')
 
             persona = None
             try:
@@ -24,10 +26,10 @@ def role_login_required(allowed_roles=None):
                     # Si no existe como Customer, intentar como Admin
                     persona = Admin.objects.get(token=token)
                 except Admin.DoesNotExist:
-                    return JsonResponse({'error': 'Invalid username'}, status=401)
+                    return redirect('index')
 
             if allowed_roles and persona.role not in allowed_roles:
-                return JsonResponse({'error': 'Unauthorized'}, status=403)
+                return redirect('index')
 
             request.persona = persona
             return view_func(request, *args, **kwargs)

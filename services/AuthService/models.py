@@ -1,8 +1,13 @@
 import re
 import uuid
+import secrets
+from datetime import timedelta
 
 from django.db import models
 import hashlib
+from django.db import IntegrityError
+from .utils import send_token_email
+from django.utils import timezone
 
 
 class AuthUser(models.Model):
@@ -21,6 +26,21 @@ class AuthUser(models.Model):
             self.email = email
             self.token = str(uuid.uuid4())
             return self.token
+
+    @classmethod
+    def update_password(cls, token, password):
+        try:
+            user = cls.objects.get(token=token)
+            if cls.is_a_valid_password(password):
+                user.password = cls.hashed_password(password)
+                user.save()
+                return True
+            else:
+                raise ValueError("Contraseña inválida")
+        except cls.DoesNotExist:
+            raise ValueError("Usuario con el token proporcionado no existe")
+        except Exception as e:
+            raise e
 
     @classmethod
     def is_authorized(cls, username, password):
@@ -51,6 +71,54 @@ class AuthUser(models.Model):
 
     class Meta:
         db_table = 'auth_user'
+
+
+class PasswordReset(models.Model):
+    email = models.EmailField(unique=True)
+    token = models.CharField(max_length=100, unique=True, null=False, default="00000")
+    created_at = models.DateTimeField(default=timezone.now)
+
+    @classmethod
+    def get_remember_password_token(cls, email):
+        try:
+            user = AuthUser.objects.get(email=email)
+            password_reset = cls(email=email, token=secrets.token_urlsafe(5))
+            if send_token_email(password_reset.email, password_reset.token):
+                password_reset.save()
+                return password_reset
+            else:
+                raise Exception("Fallo al enviar el correo")
+        except AuthUser.DoesNotExist:
+            raise Exception("El email no pertenece a un usuario")
+        except IntegrityError:
+            raise Exception("Error al generar el token")
+
+    @classmethod
+    def update_password_with_token(cls, token):
+        try:
+            if cls.is_the_token_expired(token):
+                cls.objects.get(token=token).delete()
+                raise Exception("El token expiró")
+            else:
+                password_reset = cls.objects.get(token=token)
+                return AuthUser.objects.get(email=password_reset.email).token
+        except PasswordReset.DoesNotExist:
+            raise Exception("Token no válido o ya usado")
+        except AuthUser.DoesNotExist:
+            raise Exception("Usuario no encontrado")
+        except PasswordReset.DoesNotExist:
+            raise Exception("Token incorrecto o inválido")
+
+    @classmethod
+    def is_the_token_expired(cls, token):
+        try:
+            password_remember = cls.objects.get(token=token)
+            if timezone.now() > password_remember.created_at + timedelta(minutes=5):
+                return True
+            else:
+                return False
+        except cls.DoesNotExist:
+            return True
 
 
 class InvalidPassword(Exception):
