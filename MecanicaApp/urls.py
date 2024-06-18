@@ -11,7 +11,8 @@ urlpatterns = [
     path('generate_qr/', views.qr_code_view, name='generate_qr'),
     path('login/', views.login, name='login'),
     path("mostrarAutos/", views.mostrar_autos, name="mostrarAutos"),
-    path("registrarAuto/",views.registrar_auto,name="registrarAuto"),
-    path("mostrarEstacion/",views.mostrar_estacion, name="mostrarEstacion"),
+    path("registrarAuto/", views.registrar_auto, name="registrarAuto"),
+    path("mostrarEstacion/", views.mostrar_estacion, name="mostrarEstacion"),
+    path("enviarCorreo/",views.token_sended_test, name="enviarCorreo")
 
 ]

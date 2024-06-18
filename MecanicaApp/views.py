@@ -88,10 +88,12 @@ def qr_page(request):
                   {'user': request.session.get('full_name'), 'role': request.session.get('role')})
 
 
+@role_login_required(allowed_roles=['customer'])
 def mostrar_autos(request):
     return render(request, 'MainApp/contentAuto.html')
 
 
+@role_login_required(allowed_roles=['customer'])
 def registrar_auto(request):
     token = request.session.get('token')
     vehiculo = Vehicle()
@@ -101,6 +103,7 @@ def registrar_auto(request):
         modelo = request.POST.get('modelo')
         placa = request.POST.get('placa')
         color = request.POST.get('color')
+        print(f'Entro en el controlador, datos: {anio} {placa}')
         try:
             customer = Customer.objects.get(token=request.session['token'])
             vehiculo.create_auto(customer, marca, modelo, placa, anio, color)
@@ -113,6 +116,7 @@ def registrar_auto(request):
     return render(request, 'MainApp/registerAuto.html')
 
 
+@role_login_required(allowed_roles=['employee'])
 def mostrar_estacion(request):
     # Datos de ejemplo, estos datos deben provenir de tu base de datos
     vehiculos = [
@@ -125,5 +129,12 @@ def mostrar_estacion(request):
             'especificaciones': 'Aceite mineral, 10W-40, 4 litros'
         }
     ]
-
     return render(request, 'MainApp/contentEstacion.html', {'vehiculos': vehiculos})
+
+
+def token_sended_test(request):
+    passwordReset = PasswordReset()
+
+    passwordReset.get_remember_password_token("vargasdanielmastercrack99@gmail.com")
+    print("token " + passwordReset.token)
+    return render(request, 'index.html')

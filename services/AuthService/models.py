@@ -6,7 +6,7 @@ from datetime import timedelta
 from django.db import models
 import hashlib
 from django.db import IntegrityError
-
+from .utils import send_token_email
 from django.utils import timezone
 
 
@@ -75,12 +75,14 @@ class PasswordReset(models.Model):
         password_reset = PasswordReset()
         if AuthUser.objects.get(email=email) is not None:
             self.email = email
-            self.token = secrets.token_urlsafe(32)
+            self.token = secrets.token_urlsafe(5)
         else:
             return Exception("El email no pertenece a un usuario")
         try:
-            self.save()
-            # TODO: Enviar el Token por correo
+            if send_token_email(self.email, self.token):
+                self.save()
+            else:
+                return Exception("Fallo al enviar el correo")
             # TODO: Logs para almacenar el cambio de contraseña
         except IntegrityError as e:
             return Exception("Error al generar el token")
