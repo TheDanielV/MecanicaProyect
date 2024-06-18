@@ -39,11 +39,22 @@ class Customer(Person):
         return Customer.objects.get(token=token)
 
 
+
 class Vehicle(models.Model):
     customer = models.ForeignKey(Customer, on_delete=models.CASCADE, related_name='vehicles', default="0000000000")
     marca = models.CharField(max_length=255, default=None)
     model = models.CharField(max_length=255, default=None)
     placa = models.CharField(max_length=30, default=None)
+
+    def create(self, customer, marca, model, placa):
+        self.customer = customer
+        self.marca = marca
+        self.model = model
+        self.placa = placa
+
+    @staticmethod
+    def delete_vehicle(placa):
+        Vehicle.objects.get(placa=placa).delete()
 
 
 class Admin(Person):
@@ -58,3 +69,22 @@ class Employee(Person):
     station = models.ForeignKey(Station, on_delete=models.CASCADE, related_name='employees')
 
 
+class Service(models.Model):
+    station = models.ForeignKey(Station, on_delete=models.CASCADE, related_name='servicios')
+    name = models.CharField(max_length=255)
+    description = models.TextField()
+
+
+class Order(models.Model):
+    customer = models.ForeignKey(Customer, on_delete=models.CASCADE, related_name='ordenes')
+    vehicle = models.ForeignKey(Vehicle, on_delete=models.CASCADE, related_name='ordenes')
+    service = models.ManyToManyField(Service, related_name='ordenes')
+
+    #  payment = models.CharField(max_length=2, choices=METODO_PAGO_CHOICES)
+
+    def create(self, customer, vehicle):
+        self.customer = customer
+        self.vehicle = vehicle
+
+    def __str__(self):
+        return f'Orden de {self.customer.name} para {self.vehicle.placa}'

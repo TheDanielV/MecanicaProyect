@@ -9,7 +9,6 @@ from django.db import IntegrityError
 from django.http import HttpResponse
 from MecanicaApp.decorators import *
 
-
 AUTH_DATABASE = 'auth_db'
 LOG_DATABASE = 'log_db'
 
@@ -18,9 +17,12 @@ def index(request):
     title = "MecanicaApp"
     client_ip = request.META.get('REMOTE_ADDR')
     print(client_ip)
-    return render(request, 'index.html', {
-        'title': title
-    })
+    if request.session.get('token') is not None:
+        return redirect('mostrarAutos')
+    else:
+        return render(request, 'index.html', {
+            'title': title
+        })
 
 
 def register(request):
@@ -86,16 +88,13 @@ def qr_page(request):
                   {'user': request.session.get('full_name'), 'role': request.session.get('role')})
 
 
-@role_login_required(allowed_roles=['customer'])
-    return render(request, 'MainApp/qrpagee.html', {'user': request.session.get('full_name')})
-
-
 def mostrar_autos(request):
     return render(request, 'MainApp/contentAuto.html')
 
 
 def registrar_auto(request):
     return render(request, 'MainApp/registerAuto.html')
+
 
 def mostrar_estacion(request):
     # Datos de ejemplo, estos datos deben provenir de tu base de datos
@@ -111,4 +110,3 @@ def mostrar_estacion(request):
     ]
 
     return render(request, 'MainApp/contentEstacion.html', {'vehiculos': vehiculos})
-
