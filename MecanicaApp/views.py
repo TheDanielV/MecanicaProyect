@@ -1,3 +1,5 @@
+import os
+
 from django.shortcuts import render, redirect
 from .forms import registerForm, loginForm
 from services.AuthService.models import *
