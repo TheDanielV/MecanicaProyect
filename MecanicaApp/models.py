@@ -45,6 +45,19 @@ class Vehicle(models.Model):
     marca = models.CharField(max_length=255, default=None)
     model = models.CharField(max_length=255, default=None)
     placa = models.CharField(max_length=30, default=None)
+    anio = models.CharField(max_length=30, default=None)
+    color = models.CharField(max_length=30, default=None)
+
+    def create_auto(self, customer, marca, model, placa, anio, color):
+            self.customer = customer
+            self.marca = marca
+            self.model = model
+            self.placa = placa
+            self.anio = anio
+            self.color = color
+
+    class Meta:
+        db_table = 'mecanicaapp_vehicle'
 
     def create(self, customer, marca, model, placa):
         self.customer = customer
