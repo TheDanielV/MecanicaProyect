@@ -59,12 +59,6 @@ class Vehicle(models.Model):
     class Meta:
         db_table = 'mecanicaapp_vehicle'
 
-    def create(self, customer, marca, model, placa):
-        self.customer = customer
-        self.marca = marca
-        self.model = model
-        self.placa = placa
-
     @staticmethod
     def delete_vehicle(placa):
         Vehicle.objects.get(placa=placa).delete()
