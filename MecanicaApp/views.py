@@ -57,23 +57,57 @@ def register(request):
     return render(request, 'AuthViews/register.html', {'form': form})
 
 
+# def login(request):
+#     if request.method == 'POST':
+#         form = loginForm(request.POST)
+#         if form.is_valid():
+#             auth_user = AuthUser()
+#             auth_key = auth_user.is_authorized(form.cleaned_data.get('user'),
+#                                                form.cleaned_data.get('password'))
+#             print("a")
+#             if auth_key is not None:
+#                 request.session['token'] = auth_key
+#                 return redirect("mostrarAutos")
+#             else:
+#                 return render(request, 'AuthViews/login.html', {'form': form, 'error': 'Invalid credentials'})
+#     else:
+#         form = loginForm()
+#     return render(request, 'AuthViews/login.html', {'form': form})
+
 def login(request):
     if request.method == 'POST':
         form = loginForm(request.POST)
         if form.is_valid():
+            user = form.cleaned_data.get('user')
+            password = form.cleaned_data.get('password')
+
+            # Autenticar al usuario usando tu lógica actual
             auth_user = AuthUser()
-            auth_key = auth_user.is_authorized(form.cleaned_data.get('user'),
-                                               form.cleaned_data.get('password'))
-            print("a")
+            auth_key = auth_user.is_authorized(user, password)
+
             if auth_key is not None:
                 request.session['token'] = auth_key
-                return redirect("mostrarAutos")
+
+                # Determinar el rol del usuario basado en tu modelo y lógica
+                token = request.session.get('token')
+                role = auth_user.get_role(token)  # Implementa esta función según tu modelo de usuario
+                print(f"Rol del usuario: {role}")
+
+                if role == 'admin':
+                    return redirect('admin_customer_list')
+                elif role == 'customer':
+                    return redirect('mostrarAutos')
+                elif role == 'employee':
+                    return redirect('employee_dashboard')
+                else:
+                    # Manejo para otros roles o redirigir a una página predeterminada
+                    return redirect('login')  # Ajusta según tu estructura de URLs
             else:
-                return render(request, 'AuthViews/login.html', {'form': form, 'error': 'Invalid credentials'})
+                return render(request, 'AuthViews/login.html', {'form': form, 'error': 'Credenciales inválidas'})
     else:
         form = loginForm()
-    return render(request, 'AuthViews/login.html', {'form': form})
 
+    return render(request, 'AuthViews/login.html', {'form': form})
 
 @role_login_required(allowed_roles=['customer'])
 def qr_code_view(request):
@@ -216,3 +250,8 @@ def logout_user(request):
 
 def ordenar_servicio(request):
     return render(request, 'MainApp/orderServicio.html')
+
+@role_login_required(allowed_roles=['admin'])
+def admin_customer_list(request):
+    customers = Customer.objects.all()
+    return render(request, 'MainApp/adminListaClientes.html', {'customers': customers})

@@ -22,5 +22,6 @@ urlpatterns = [
     path('logout/', views.logout_user, name='logout'),
     path("ordenarServicio/", views.ordenar_servicio, name="ordenarServicio"),
 
+    path('admin/customers/', views.admin_customer_list, name='admin_customer_list'),
 
 ]
