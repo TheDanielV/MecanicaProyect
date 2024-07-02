@@ -147,7 +147,7 @@ def send_email_form(request):
         try:
             passwordReset = PasswordReset()
             token = passwordReset.get_remember_password_token(email)
-            send_token_email(email, token)
+            # send_token_email(email, token)
             return redirect('enviarCorreo')
         except Exception as e:
             return render(request, 'AuthViews/emailInput.html', {'form': form, 'error': e})

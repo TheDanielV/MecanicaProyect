@@ -10,7 +10,7 @@
       <div class="col-md-6">
         <div class="row align-items-center">
           <div class="col-md-3">
-            <img src="https://lubricadoratarquino.com/wp-content/uploads/2021/08/logo-tarquino_Mesa-de-trabajo-1.png" alt="" class="img-fluid">
+            <img src="{% static 'images/logoHeader.png' %}" alt="" class="img-fluid">
           </div>
           <div class="col-md-9">
             <h1 class="display-4">¡Bienvenido!</h1>
@@ -31,7 +31,7 @@
     {% csrf_token %}
     {{form.as_p}}
         <button  class="btn btn-primary btn-block">
-        Confirmar token
+        Confirmar
     </button>
                                   <button type="button" class="btn btn-primary" onclick="window.location.href = '{% url 'recuperarContraseña' %}'" style="background-color:#2C2F40; border-color:#2C2F40; color: white;">
                     Reenviar Correo
