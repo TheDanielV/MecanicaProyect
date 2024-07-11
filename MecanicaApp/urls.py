@@ -21,6 +21,8 @@ urlpatterns = [
     path('eliminarAuto/<int:auto_id>/', views.eliminar_auto, name='eliminarAuto'),
     path('logout/', views.logout_user, name='logout'),
     path("ordenarServicio/", views.ordenar_servicio, name="ordenarServicio"),
+    path("ordenes/", views.listar_ordenes, name="listar_ordenes"),
+    path('orden/<int:id>/', views.detalle_orden, name='detalle_orden'),
 
 
 ]

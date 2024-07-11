@@ -8,37 +8,49 @@
     <h1 class="mx-auto text-center font-weight-bold">
       Mis Autos
     </h1>
-    <button class="btn btn-lg" onclick="window.location.href = '{% url 'registrarAuto' %}'
-          " style="background-color:#A62D43; border-color:#A62D43; color:#ffff">
+    <button class="btn btn-lg" onclick="window.location.href = '{% url 'registrarAuto' %}'"
+            style="background-color:#A62D43; border-color:#A62D43; color:#ffff">
       Registrar vehículo
     </button>
   </div>
 
   {% for auto in autos %}
-  <div class="row ">
-    <div class="col-12 col-md-8 offset-md-2 mb-3">
-        <div class="card shadow">
-            <div class="card-body">
-                <h5 class="card-title text-center" style="font-size: 22px;">Especificaciones</h5>
-                <div class="row">
-                    <div class="col-4">
-                        <p class="text-center mt-3">Placa:</p>
-                        <p class="placa bg-light p-3 mt-3 text-center" style="font-size: 24px;
-            font-weight: bold;">{{ auto.placa }}</p>
-                    </div>
-                    <div class="col-8 mt-3">
-                        <p>Año: {{ auto.anio }} </p>
-                        <p>Marca: {{ auto.marca }}</p>
-                        <p>Modelo: {{ auto.model }}</p>
-                        <button class="btn btn-danger mt-4" onclick="confirmDeletion({{ auto.id }})">
-                            Eliminar
-                        </button>
-                    </div>
+  <div class="row mb-3">
+    <div class="col-12 col-md-8 offset-md-2">
+      <div class="card shadow">
+        <div class="card-body">
+          <h5 class="card-title text-center" style="font-size: 22px;">Especificaciones</h5>
+          <div class="row">
+            <div class="col-8">
+              <div class="row">
+                <div class="col-6">
+                  <p class="text-center mt-3">Placa:</p>
+                  <p class="placa bg-light p-3 mt-3 text-center" style="font-size: 24px; font-weight: bold;">
+                    {{ auto.placa }}
+                  </p>
                 </div>
+                <div class="col-6 mt-3">
+                  <p>Año: {{ auto.anio }} </p>
+                  <p>Marca: {{ auto.marca }}</p>
+                  <p>Modelo: {{ auto.model }}</p>
+                </div>
+              </div>
+              <button class="btn btn-danger mt-4" onclick="confirmDeletion({{ auto.id }})">
+                Eliminar
+              </button>
             </div>
+            <div class="col-4 d-flex align-items-center">
+              <div class="card" style="background-color: #FFFACD; width: 100%;">
+                <div class="card-body text-center">
+                  <h5 class="card-title" style="font-size: 22px;">En progreso</h5>
+                </div>
+              </div>
+            </div>
+          </div>
         </div>
+      </div>
     </div>
-</div>
+  </div>
   {% endfor %}
 
   <script>
@@ -59,9 +71,5 @@
     }
   </script>
 </div>
-
-
-
-
 
 {% endblock %}

@@ -2,7 +2,7 @@ import os
 
 from django.contrib import messages
 from django.contrib.auth import logout
-from django.shortcuts import render, redirect
+from django.shortcuts import render, redirect, get_object_or_404
 from .forms import *
 from services.AuthService.models import *
 from .utils import *
@@ -215,3 +215,52 @@ def logout_user(request):
 
 def ordenar_servicio(request):
     return render(request, 'MainApp/orderServicio.html')
+
+def listar_ordenes(request):
+    ordenes = [
+        {
+            'id': 1,
+            'cliente': {'nombre': 'Juan Pérez'},
+            'placa': 'PCM-6769',
+            'valor_total': 15000,
+            'estado': 'Pagado'
+        },
+        {
+            'id': 2,
+            'cliente': {'nombre': 'Ana López'},
+            'placa': 'PDB-1856',
+            'valor_total': 18000,
+            'estado': 'No Pagado'
+        },
+        {
+            'id': 3,
+            'cliente': {'nombre': 'Luis Martínez'},
+            'placa': 'PBB-1412',
+            'valor_total': 20000,
+            'estado': 'Pagado'
+        }
+    ]
+    return render(request, 'MainApp/contentOrdenes.html', {'ordenes': ordenes})
+
+def detalle_orden(request, id):
+
+    orden = {
+        'id': id,
+        'fecha': '2023-07-10',
+        'cliente': {'nombre': 'Juan Pérez'},
+        'vehiculo': 'PCM-6769'
+    }
+    servicios = [
+        {
+            'codigo': 1,
+            'descripcion': 'Cambio de aceite',
+            'total': 50.00
+        },
+        {
+            'codigo': 2,
+            'descripcion': 'Revisión de frenos',
+            'total': 30.00
+        }
+    ]
+    valor_total = sum(servicio['total'] for servicio in servicios)
+    return render(request, 'MainApp/contentDetalleOrden.html', {'orden': orden, 'servicios': servicios, 'valor_total': valor_total})
