@@ -45,6 +45,43 @@ class loginForm(forms.Form):
         attrs={'class': 'input form-control', 'placeholder': 'Ingrese una contraseña'}))
 
 
+class crearServicioForm(forms.Form):
+    nombreServicio = forms.CharField(
+        label="Nombre",
+        max_length=400,
+        widget=forms.TextInput(attrs={
+            'class': 'form-control mt-2',
+            'placeholder': 'Ingrese el nombre del servicio'
+        })
+    )
+    descripcionServicio = forms.CharField(
+        label="Descripción",
+        max_length=800,
+        widget=forms.TextInput(attrs={
+            'class': 'form-control mt-2',
+            'placeholder': 'Ingrese la descripción del servicio'
+        })
+    )
+    precioServicio = forms.DecimalField(
+        label="Precio",
+        max_digits=10,
+        decimal_places=2,
+        widget=forms.TextInput(attrs={
+            'class': 'form-control mt-2',
+            'placeholder': 'Ingrese el precio del servicio'
+        }),
+        error_messages={
+            'invalid': 'Por favor, ingrese un valor numérico válido.',
+        }
+    )
+
+    def clean_precioServicio(self):
+        precio = self.cleaned_data.get('precioServicio')
+        if precio is not None and precio.as_integer_ratio()[1] > 100:  # Chequea los decimales
+            raise ValidationError('El precio no puede tener más de 2 decimales.')
+        return precio
+
+
 class QRCodeForm(forms.Form):
     qr_code = forms.ImageField()
 

@@ -4,12 +4,15 @@ from django.contrib import messages
 from django.contrib.auth import logout
 from django.shortcuts import render, redirect, get_object_or_404
 from .forms import *
+from django.shortcuts import render, redirect
+from .forms import registerForm, loginForm, crearServicioForm
 from services.AuthService.models import *
 from .utils import *
 from .models import *
 from django.db import IntegrityError, transaction
 from django.http import HttpResponse
 from MecanicaApp.decorators import *
+from django.shortcuts import render, get_object_or_404, redirect
 
 AUTH_DATABASE = 'auth_db'
 LOG_DATABASE = 'log_db'
@@ -378,3 +381,57 @@ def success(request):
 
 def subirQR(request):
     return render(request, 'MainApp/subirQR.html')
+
+
+def mostrar_servicios(request):
+    services = [
+        {"id": 1, "nombre": "Servicio 1", "descripcion": "Desdddddción 1", "precio": 100},
+        {"id": 2, "nombre": "Servicio 2", "descripcion": "Descripción 2", "precio": 200},
+        # Agrega más servicios según sea necesario
+    ]
+    context = {
+        'services': services
+    }
+    return render(request, 'MainApp/contentServices.html',context)
+
+def crearServicios(request):
+    if request.method == 'POST':
+        form = crearServicioForm(request.POST)
+        if form.is_valid():
+            # Aquí asumimos que tienes un modelo para el servicio y un método save en el formulario
+            # Si no, deberías manejar el guardado del servicio aquí manualmente
+            form.save()
+            return redirect('mostrarServicios')
+    else:
+        form = crearServicioForm()
+    return render(request, 'MainApp/crear_servicio.html', {'form': form})
+
+
+def editarServicios(request, service_id):
+    servicios_data = [
+        {"id": 1, "nombre": "Servicio 1", "descripcion": "Descripción 1", "precio": 100},
+        {"id": 2, "nombre": "Servicio 2", "descripcion": "Descripción 2", "precio": 200},
+        # Agrega más servicios según sea necesario
+    ]
+
+    # Encuentra el servicio por su id
+    servicio = next((s for s in servicios_data if s["id"] == service_id), None)
+    if not servicio:
+        return render(request, '404.html', status=404)
+
+    if request.method == 'POST':
+        form = crearServicioForm(request.POST)
+        if form.is_valid():
+            # Aquí puedes simular la actualización del servicio
+            servicio["nombre"] = form.cleaned_data['nombreServicio']
+            servicio["descripcion"] = form.cleaned_data['descripcionServicio']
+            servicio["precio"] = form.cleaned_data['precioServicio']
+            return redirect('mostrarServicios')  # Redirige a la lista de servicios (deberás definir esta vista)
+    else:
+        form = crearServicioForm(initial={
+            'nombreServicio': servicio['nombre'],
+            'descripcionServicio': servicio['descripcion'],
+            'precioServicio': servicio['precio'],
+        })
+
+    return render(request, 'MainApp/editar_servicio.html', {'form': form, 'service_id': service_id})

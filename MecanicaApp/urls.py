@@ -35,5 +35,14 @@ urlpatterns = [
     path('retirarAuto/', views.retirarAuto, name='retirarAuto'),
     path('success/', views.success, name='success'),
     path('subirQR/', views.subirQR, name='subirQR'),
+    path("registrarAuto/",views.registrar_auto,name="registrarAuto"),
+
+    path("mostrarServicios/",views.mostrar_servicios, name='mostrarServicios'),
+
+    path("crearServicio/", views.crearServicios, name="crearServicio"),
+
+    path("editar_servicio/<int:service_id>/", views.editarServicios, name='editar_servicio'),
+
+
 
 ]
