@@ -76,20 +76,7 @@ class crearServicioForm(forms.Form):
             'invalid': 'Por favor, ingrese un valor numérico válido.',
         }
     )
-    ESTACION_CHOICES = [
-        ('estacion1', 'Estacion Uno'),
-        ('estacion2', 'Estacion Dos'),
-        ('estacion3', 'Estacion Tres'),
-        ('estacion4', 'Estacion cuatro')
-    ]
 
-    estacion = forms.ChoiceField(
-        label="Estación",
-        choices=ESTACION_CHOICES,
-        widget=forms.Select(attrs={
-            'class': 'form-control mt-2'
-        })
-    )
     estacionServicio = forms.ModelChoiceField(
         label="Estación",
         queryset=Station.objects.all(),
