@@ -27,6 +27,33 @@
       <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.min.css">
 
   </head>
+    <style>
+  
+   .btn-submit {
+        background-color: #A62D43; /* Ensure the default color is set */
+        border-color: #A62D43;
+        color: #ffffff;
+        padding: 10px 20px;
+    }
+
+    .btn-submit:hover {
+        background-color: #8e2536;
+        border-color: #8e2536;
+    }
+    .btn-cancel {
+        background-color: #ccc;
+        border-color: #ccc;
+        color: black;
+        padding: 10px 20px;
+        border-radius: 5px;
+        cursor: pointer;
+    }
+
+    .btn-cancel:hover {
+        background-color: #999;
+        border-color: #999;
+    }
+    </style>
   <body>
     <nav class="navbar navbar-expand-lg navbar-black " style="background-color:#2C2F40">
       <div class="container">
@@ -48,15 +75,16 @@
             style="font-family: 'Arial', sans-serif; font-size: 20px"
           >
             <li class="nav-item">
-              <a class="nav-link" href="#" style="color:#ffff"> Inicio </a>
+              <a class="nav-link" href="#" style="color:#ffff"> Cuentas </a>
+            </li>
+              <li class="nav-item">
+              <a class="nav-link" href="#" style="color:#ffff">Ordenes </a>
             </li>
             <li class="nav-item">
               <a class="nav-link" href='{% url 'mostrarServicios' %}' style="color:#ffff">Servicios </a>
             </li>
            
-            <li class="nav-item">
-              <a class="nav-link" href="#" style="color:#ffff"> Cuenta </a>
-            </li>
+            
           </ul>
         </div>
       </div>
