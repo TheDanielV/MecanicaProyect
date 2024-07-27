@@ -1,0 +1,92 @@
+{% extends 'base/autos.html' %}
+
+{% block content %}
+<style>
+    .btn-submit {
+        background-color: #A62D43;
+        border-color: #A62D43;
+        color: white;
+        padding: 10px 20px;
+        border-radius: 5px;
+        cursor: pointer;
+        margin-right: 10px; 
+    }
+
+    .btn-submit:hover {
+        background-color: #8e2536;
+        border-color: #8e2536;
+    }
+
+    .btn-cancel {
+        background-color: #ccc;
+        border-color: #ccc;
+        color: black;
+        padding: 10px 20px;
+        border-radius: 5px;
+        cursor: pointer;
+    }
+
+    .btn-cancel:hover {
+        background-color: #999;
+        border-color: #999;
+    }
+
+    .hidden {
+        display: none;
+    }
+
+    .button-group {
+        display: flex;
+        justify-content: center;
+    }
+    
+</style>
+<div class="container1" style="max-width: 600px; margin: auto;">
+
+    <div class="card mb-4" style="margin-top: 20px">
+        <div class="card-body">
+            <h3 class="card-title text-center">Retiro del auto</h3>
+            <p class ="text-center">Ingrese la información de la persona autorizada para retirar el vehículo</p>
+            <form method="post" enctype="multipart/form-data" style="margin: 15px">
+                {% csrf_token %}
+                <div class="form-group">
+                    {{ form.name.label_tag }}
+                    {{ form.name }}
+                </div>
+                <div class="form-group">
+                    {{ form.last_name.label_tag }}
+                    {{ form.last_name }}
+                </div>
+                <div class="form-group">
+                    {{ form.cellphone.label_tag }}
+                    {{ form.cellphone }}
+                </div>
+                <div class="form-group">
+                    {{ form.ci.label_tag }}
+                    {{ form.ci }}
+                </div>
+                <div class="form-group">
+                    {{ form.direction.label_tag }}
+                    {{ form.direction }}
+                </div>
+                <div class="form-group">
+                    {{ form.email.label_tag }}
+                    {{ form.email }}
+                </div>
+                <div class="mb-3">
+                    {{ form.file.label_tag }}
+                    {{ form.file }}
+                </div>
+                 <div class="button-group">
+                    <button type="submit" class="btn-submit" id="enviarButton">
+                        Enviar
+                    </button>
+                    <button type="button" class="btn-cancel" onclick="window.location.href='{% url 'mostrarAutos' %}'">
+                        Cancelar
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}

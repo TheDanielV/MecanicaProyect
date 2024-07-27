@@ -2,15 +2,17 @@ import os
 
 from django.contrib import messages
 from django.contrib.auth import logout
-from django.shortcuts import render, redirect
+from django.shortcuts import render, redirect, get_object_or_404
 from .forms import *
+from django.shortcuts import render, redirect
+from .forms import registerForm, loginForm, crearServicioForm
 from services.AuthService.models import *
 from .utils import *
 from .models import *
-from django.db import IntegrityError
+from django.db import IntegrityError, transaction
 from django.http import HttpResponse
 from MecanicaApp.decorators import *
-from django.shortcuts import render, redirect, get_object_or_404
+from django.shortcuts import render, get_object_or_404, redirect
 
 AUTH_DATABASE = 'auth_db'
 LOG_DATABASE = 'log_db'
@@ -21,11 +23,29 @@ def index(request):
     client_ip = request.META.get('REMOTE_ADDR')
     print(client_ip)
     if request.session.get('token') is not None:
-        return redirect('mostrarAutos')
+        return redirect('default_view')
     else:
         return render(request, 'index.html', {
             'title': title
         })
+
+
+@role_login_required(allowed_roles=['admin', 'employee', 'customer'])
+def default_view(request):
+    if request.session.get('token') is not None:
+
+        persona = None
+        try:
+            persona = Customer.objects.get(token=request.session.get('token'))
+        except Customer.DoesNotExist:
+            try:
+                persona = Admin.objects.get(token=request.session.get('token'))
+            except Admin.DoesNotExist:
+                pass
+        if persona.role == 'admin':
+            return redirect("listar_ordenes")
+        elif persona.role == 'customer':
+            return redirect("mostrarAutos")
 
 
 def register(request):
@@ -41,16 +61,23 @@ def register(request):
                 customer.create(form.cleaned_data.get('name'), form.cleaned_data.get('last_name'),
                                 form.cleaned_data.get('ci'), form.cleaned_data.get('cellphone'),
                                 form.cleaned_data.get('direction'), token)
-                user.save(using=AUTH_DATABASE)
-                customer.save(using='default')
-                return render(request, 'index.html', {
-                    'title': "Usuario Creado"
-                })
+                # 4 Transaction
+
+                with transaction.atomic(using=AUTH_DATABASE):
+                    user.save()
+                    with transaction.atomic(using='default'):
+                        customer.save()
+
             except IntegrityError as e:
                 # voy a reenviar el mismo formulario con los datos mismos datos, excepto contraseña
                 return render(request, 'AuthViews/register.html', {'form': form, 'error': e})
             except InvalidPassword as e:
                 return render(request, 'AuthViews/register.html', {'form': form, 'error': e})
+
+            # en caso de no ocurrir ningun error
+            return render(request, 'index.html', {
+                'title': "Usuario Creado"
+            })
     else:
         # Si es una solicitud GET, mostrar el formulario vacío
         form = registerForm()
@@ -64,10 +91,11 @@ def login(request):
             auth_user = AuthUser()
             auth_key = auth_user.is_authorized(form.cleaned_data.get('user'),
                                                form.cleaned_data.get('password'))
-            print("a")
             if auth_key is not None:
                 request.session['token'] = auth_key
-                return redirect("mostrarAutos")
+                # Redirección en base a roles
+                return redirect('default_view')
+
             else:
                 return render(request, 'AuthViews/login.html', {'form': form, 'error': 'Invalid credentials'})
     else:
@@ -214,5 +242,203 @@ def logout_user(request):
     logout(request)
     return redirect('index')
 
-def ordenar_servicio(request):
-    return render(request, 'MainApp/orderServicio.html')
+
+@role_login_required(allowed_roles=['customer'])
+def ordenar_servicio(request, id):
+    vehicle = Vehicle.get_vehicle_by_placa(id)
+    if vehicle.customer.token == request.session.get('token'):
+        return render(request, 'MainApp/orderServicio.html', context={'vechicle': vehicle})
+    else:
+        return redirect('mostrarAutos')
+
+
+@role_login_required(allowed_roles=['admin'])
+def listar_ordenes(request):
+    ordenes = [
+        {
+            'id': 1,
+            'cliente': {'nombre': 'Juan Pérez'},
+            'placa': 'PCM-6769',
+            'valor_total': 15000,
+            'estado': 'Pagado'
+        },
+        {
+            'id': 2,
+            'cliente': {'nombre': 'Ana López'},
+            'placa': 'PDB-1856',
+            'valor_total': 18000,
+            'estado': 'No Pagado'
+        },
+        {
+            'id': 3,
+            'cliente': {'nombre': 'Luis Martínez'},
+            'placa': 'PBB-1412',
+            'valor_total': 20000,
+            'estado': 'Pagado'
+        }
+    ]
+    return render(request, 'MainApp/contentOrdenes.html', {'ordenes': ordenes})
+
+
+@role_login_required(allowed_roles=['admin'])
+def detalle_orden(request, id):
+    orden = {
+        'id': id,
+        'fecha': '2023-07-10',
+        'cliente': {'nombre': 'Juan Pérez'},
+        'vehiculo': 'PCM-6769'
+    }
+    servicios = [
+        {
+            'codigo': 1,
+            'descripcion': 'Cambio de aceite',
+            'total': 50.00
+        },
+        {
+            'codigo': 2,
+            'descripcion': 'Revisión de frenos',
+            'total': 30.00
+        }
+    ]
+    valor_total = sum(servicio['total'] for servicio in servicios)
+    return render(request, 'MainApp/contentDetalleOrden.html',
+                  {'orden': orden, 'servicios': servicios, 'valor_total': valor_total})
+
+
+def upload_qr(request):
+    if request.method == 'POST':
+        form = QRCodeForm(request.POST, request.FILES)
+        if form.is_valid():
+            qr_image = form.cleaned_data['qr_code']
+            qr_image_bytes = BytesIO(qr_image.read())
+
+            # decrypted_data = read_qr_code(qr_image_bytes)
+            # obj_dict = json.loads(decrypted_data) if decrypted_data else None
+
+            return render(request, 'QR/result.html', {'data': "n"})
+
+    else:
+        form = QRCodeForm()
+    return render(request, 'QR/upload_qr.html', {'form': form})
+
+
+def create_admin(request):
+    auth = AuthUser()
+    token = auth.create_user(password="Password1020", username='Admin', email='admin@admin.com')
+    auth.save()
+    admin = Admin()
+    admin.create_admin("daniel", "vargas", token)
+    admin.save()
+    return redirect('login')
+    return render(request, 'MainApp/contentDetalleOrden.html',
+                  {'orden': orden, 'servicios': servicios, 'valor_total': valor_total})
+
+
+@role_login_required(allowed_roles=['customer'])
+def payment(request):
+    if request.method == 'POST':
+        form = PaymentForm(request.POST)
+        if form.is_valid():
+            metodo_pago = form.cleaned_data['metodo_pago']
+            if metodo_pago == 'transferencia':
+                return redirect('transferencia')
+            else:
+                return redirect('success')
+
+    else:
+        form = PaymentForm()
+    return render(request, 'MainApp/contentPayment.html', {'form': form})
+
+
+@role_login_required(allowed_roles=['customer'])
+def transferencia(request):
+    if request.method == 'POST':
+        form = TransferenciaForm(request.POST, request.FILES)
+        if form.is_valid():
+            return redirect('success')
+    else:
+        form = TransferenciaForm()
+    return render(request, 'MainApp/contentTransferencia.html', {'form': form})
+
+
+@role_login_required(allowed_roles=['customer'])
+def retirarAuto(request):
+    if request.method == 'POST':
+        form = retirarAutoForm(request.POST, request.FILES)
+        if form.is_valid():
+            # Procesa los datos del formulario aquí, por ejemplo, guardándolos en la base de datos
+            # name = form.cleaned_data['name']
+            # last_name = form.cleaned_data['last_name']
+            # cellphone = form.cleaned_data['cellphone']
+            # ci = form.cleaned_data['ci']
+            # file = form.cleaned_data['file']
+            # Redirige a una página de éxito
+            return redirect('success')
+    else:
+        form = retirarAutoForm()
+    return render(request, 'MainApp/contentRetirarAuto.html', {'form': form})
+
+
+def success(request):
+    return render(request, 'MainApp/success.html')
+
+
+def subirQR(request):
+    return render(request, 'MainApp/subirQR.html')
+
+
+@role_login_required(allowed_roles=['admin'])
+def mostrar_servicios(request):
+    services = [
+        {"id": 1, "nombre": "Servicio 1", "descripcion": "Desdddddción 1", "precio": 100},
+        {"id": 2, "nombre": "Servicio 2", "descripcion": "Descripción 2", "precio": 200},
+        # Agrega más servicios según sea necesario
+    ]
+    context = {
+        'services': services
+    }
+    return render(request, 'MainApp/contentServices.html', context)
+
+
+@role_login_required(allowed_roles=['admin'])
+def crearServicios(request):
+    if request.method == 'POST':
+        form = crearServicioForm(request.POST)
+        if form.is_valid():
+            # Aquí asumimos que tienes un modelo para el servicio y un método save en el formulario
+            # Si no, deberías manejar el guardado del servicio aquí manualmente
+            form.save()
+            return redirect('mostrarServicios')
+    else:
+        form = crearServicioForm()
+    return render(request, 'MainApp/crear_servicio.html', {'form': form})
+
+
+def editarServicios(request, service_id):
+    servicios_data = [
+        {"id": 1, "nombre": "Servicio 1", "descripcion": "Descripción 1", "precio": 100},
+        {"id": 2, "nombre": "Servicio 2", "descripcion": "Descripción 2", "precio": 200},
+        # Agrega más servicios según sea necesario
+    ]
+
+    # Encuentra el servicio por su id
+    servicio = next((s for s in servicios_data if s["id"] == service_id), None)
+    if not servicio:
+        return render(request, '404.html', status=404)
+
+    if request.method == 'POST':
+        form = crearServicioForm(request.POST)
+        if form.is_valid():
+            # Aquí puedes simular la actualización del servicio
+            servicio["nombre"] = form.cleaned_data['nombreServicio']
+            servicio["descripcion"] = form.cleaned_data['descripcionServicio']
+            servicio["precio"] = form.cleaned_data['precioServicio']
+            return redirect('mostrarServicios')  # Redirige a la lista de servicios (deberás definir esta vista)
+    else:
+        form = crearServicioForm(initial={
+            'nombreServicio': servicio['nombre'],
+            'descripcionServicio': servicio['descripcion'],
+            'precioServicio': servicio['precio'],
+        })
+
+    return render(request, 'MainApp/editar_servicio.html', {'form': form, 'service_id': service_id})

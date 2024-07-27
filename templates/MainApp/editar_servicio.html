@@ -1,0 +1,38 @@
+{% extends 'base/servicios.html' %}
+{% block content %}
+
+   <div class="container mt-5">
+        <h1 class="mt-5 text-center">Editar Servicio</h1>
+        <div class="container mt-4 d-flex justify-content-center">
+            <!-- Formulario Registro de Servicio -->
+            <form id="formularioServicios" method="post" action="{% url 'editar_servicio' service_id %}" class="w-50">
+                {% csrf_token %}
+                <div class="form-group mb-3">
+                    <label for="{{ form.nombreServicio.id_for_label }}">{{ form.nombreServicio.label }}</label>
+                    {{ form.nombreServicio }}
+                </div>
+                <div class="form-group mb-3">
+                    <label for="{{ form.descripcionServicio.id_for_label }}">{{ form.descripcionServicio.label }}</label>
+                    {{ form.descripcionServicio }}
+                </div>
+                   <div class="form-group mb-3">
+                    <label for="{{ form.precioServicio.id_for_label }}">{{ form.precioServicio.label }}</label>
+                    {{ form.precioServicio }}
+                    {% if form.precioServicio.errors %}
+                        <div class="invalid-feedback">
+                            {% for error in form.precioServicio.errors %}
+                                <p>{{ error }}</p>
+                            {% endfor %}
+                        </div>
+                    {% endif %}
+                </div>
+                <div class="text-center">
+                    <button type="submit" class="btn btn-primary custom-btn btn-submit btn-submit" 
+                            >Guardar</button>
+                    <a href="{% url 'mostrarServicios' %}" class="btn btn-secondary custom-btn btn-cancel " 
+                       >Cancelar</a>
+                </div>
+            </form>
+        </div>
+    </div>
+{% endblock %}

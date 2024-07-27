@@ -4,6 +4,7 @@ from django.shortcuts import redirect
 
 from .models import Customer, Admin
 
+
 def role_login_required(allowed_roles=None):
     if allowed_roles is None:
         allowed_roles = []

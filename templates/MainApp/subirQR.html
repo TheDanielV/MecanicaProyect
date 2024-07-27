@@ -1,0 +1,49 @@
+{% extends 'base/autos.html' %}
+
+{% block content %}
+    <div class="container mt-5 d-flex justify-content-center">
+        <form method="post" action="" class="w-75">
+            <div class="col-12 col-md-8 offset-md-2 mb-3 mt-5">
+                <div class="card shadow" style="max-width: 600px; height: auto;">
+                    <h1 class="card-title text-center mt-4" style="font-size: 25px; font-weight: bold;">
+                        Subir QR
+                    </h1>
+
+                    <div class="mt-4 d-flex justify-content-center wi">
+                        <input
+                            class="form-control"
+                            style="max-width: 560px; width: 100%; font-size: 20px;"
+                            type="file"
+                            id="formFile" 
+                            accept="image/*" 
+                        />
+                    </div>
+
+                    <div class="preview-container mt-2" style="text-align: center;">
+                        <img id="preview" class="card-img m-4" style="display: none; max-width: 550px; height: auto;" alt="Vista Previa" />
+                    </div>
+                </div>
+            </div>
+        </form>
+    </div>
+
+    <script>
+        document.getElementById('formFile').addEventListener('change', function(event) {
+            const file = event.target.files[0];
+            const preview = document.getElementById('preview');
+
+            if (file) {
+                const reader = new FileReader();
+                
+                reader.onload = function(e) {
+                    preview.src = e.target.result;
+                    preview.style.display = 'block'; 
+                }
+
+                reader.readAsDataURL(file);
+            } else {
+                preview.style.display = 'none'; 
+            }
+        });
+    </script>
+{% endblock %}
