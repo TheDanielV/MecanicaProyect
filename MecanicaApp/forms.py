@@ -43,3 +43,7 @@ class loginForm(forms.Form):
         attrs={'class': 'input form-control', 'placeholder': 'Ingrese su corrreo'}))
     password = forms.CharField(label="Contraseña", widget=forms.PasswordInput(
         attrs={'class': 'input form-control', 'placeholder': 'Ingrese una contraseña'}))
+
+
+class QRCodeForm(forms.Form):
+    qr_code = forms.ImageField()

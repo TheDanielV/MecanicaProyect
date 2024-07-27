@@ -1,21 +1,31 @@
-import base64
-import os
 from io import BytesIO
+
+from PIL.Image import Image
 from django.forms.models import model_to_dict
 from django.core.serializers.json import DjangoJSONEncoder
+from django.conf import settings
 import qrcode
 import json
 from nacl.secret import SecretBox
 from nacl.encoding import Base64Encoder
+from pyzbar.pyzbar import decode
 
 
 def encrypt_serializer_object(obj):
-    key = b'\xc95\x8a\x92\xf0\x1e,\xb4\r\xbf\xc2I\x8fv\x00\xd6\xca\xcc\x9f\xaa\x03\xc8\x83\xdc\x90\x81X^8u\x8d\xd2'
+    key = settings.CRYPT_KEY
     crypt_key = SecretBox(key)
     encrypter = crypt_key.encrypt(obj)
     crypt_data = encrypter.ciphertext
     data_base64 = Base64Encoder.encode(crypt_data).decode('utf-8')
     return data_base64
+
+
+def decrypt_serializer_object(encrypted_data_base64):
+    key = settings.CRYPT_KEY
+    crypt_key = SecretBox(key)
+    encrypted_data = Base64Encoder.decode(encrypted_data_base64.encode('utf-8'))
+    decrypted_data = crypt_key.decrypt(encrypted_data)
+    return decrypted_data
 
 
 def serialize_object(obj):
@@ -39,3 +49,5 @@ def generate_qr_code(data):
     img.save(byte_io, 'PNG')
     byte_io.seek(0)
     return byte_io
+
+

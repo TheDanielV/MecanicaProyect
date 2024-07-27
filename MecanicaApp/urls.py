@@ -6,6 +6,7 @@ from . import views
 
 urlpatterns = [
     path("", views.index, name="index"),
+    path("redirect/", views.default_view, name="default_view"),
     path("register/", views.register, name="register"),
     path("qr/", views.qr_page, name="qr"),
     path('generate_qr/', views.qr_code_view, name='generate_qr'),
@@ -19,9 +20,14 @@ urlpatterns = [
     path("registrarAuto/",views.registrar_auto,name="registrarAuto"),
     path('eliminarAuto/<int:auto_id>/', views.eliminar_auto, name='eliminarAuto'),
     path('logout/', views.logout_user, name='logout'),
-    path("ordenarServicio/", views.ordenar_servicio, name="ordenarServicio"),
+    path("ordenarServicio/<str:id>/", views.ordenar_servicio, name="ordenarServicio"),
     path("ordenes/", views.listar_ordenes, name="listar_ordenes"),
     path('orden/<int:id>/', views.detalle_orden, name='detalle_orden'),
 
+    # Para crear un admin base
+    path('admin/create/', views.create_admin, name='create_admin'),
+
+    # Para el qr
+    path('upload_qr/', views.upload_qr, name='upload_qr'),
 
 ]

@@ -5,7 +5,7 @@
     <h1 class="text-center">Registrar Vehículo</h1>
 
     <div class="container mt-4 d-flex justify-content-center">
-        <form method="post" action="{% url 'registrarAuto' %}" class="w-50">
+        <form method="post" action="{% url 'registrarAuto' %}" class="w-50" id="regiter">
             {% csrf_token %}
             <div class="form-group mb-3">
                 <label for="año">Año</label>
@@ -25,6 +25,7 @@
             <div class="form-group mb-3">
                 <label for="placa">Placa</label>
                 <input type="text" class="form-control mt-2 " id="placa" name="placa" placeholder="Ingrese la placa" required>
+                        <p id="mensajeError" style="color: red;"></p>
             </div>
 
             <div class="form-group mb-3">
@@ -39,4 +40,17 @@
     </div>
 
 </div>
+        <script>
+        document.getElementById('regiter').addEventListener('submit', function(event) {
+            const codigo = document.getElementById('placa').value;
+            const regex = /^[A-Z]{3}-\d{3,4}$/;
+
+            if (!regex.test(codigo)) {
+                event.preventDefault();
+                document.getElementById('mensajeError').textContent = 'Placa Incorrecta, ingreselo de la forma XXX-123/XXX-1234';
+            } else {
+                document.getElementById('mensajeError').textContent = '';
+            }
+        });
+    </script>
 {% endblock %}

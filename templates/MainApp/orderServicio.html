@@ -7,7 +7,7 @@
 <div class="container mt-4 d-flex justify-content-center">
 
     <!-- Formulario Registro de Vehiculo-->
-    <form id="formularioServicio" method="post" action='{% url 'ordenarServicio' %}' class="w-50">
+    <form id="formularioServicio" method="post" action='{% url 'ordenarServicio' id=vechicle.placa %}' class="w-50">
         {% csrf_token %}
 
         <!-- Información del vehículo en una tarjeta -->
@@ -16,11 +16,11 @@
                 Información del Vehículo
             </div>
             <div class="card-body">
-                <p class="card-text"><strong>Año:</strong> 2008</p>
-                <p class="card-text"><strong>Marca:</strong> Chevrolet</p>
-                <p class="card-text"><strong>Modelo:</strong> Aveo</p>
-                <p class="card-text"><strong>Placa:</strong> PDB-1856</p>
-                <p class="card-text"><strong>Color:</strong> Plata</p>
+                <p class="card-text"><strong>Año:</strong> {{vechicle.anio}}</p>
+                <p class="card-text"><strong>Marca:</strong> {{vechicle.marca}}</p>
+                <p class="card-text"><strong>Modelo:</strong> {{vechicle.model}}</p>
+                <p class="card-text"><strong>Placa:</strong> {{vechicle.placa}}</p>
+                <p class="card-text"><strong>Color:</strong> {{vechicle.color}}</p>
             </div>
         </div>
 

@@ -39,6 +39,19 @@ class Customer(Person):
         return Customer.objects.get(token=token)
 
 
+class Guest(models.Model):
+    ci = models.CharField(max_length=20, primary_key=True, default="0000000000")
+    name = models.CharField(max_length=30, default="None")
+    last_name = models.CharField(max_length=30, null=False, default="None")
+    validation_token = models.CharField(max_length=50, default=None)
+
+    def create_guest(self, ci, name, last_name, validation_token):
+        self.ci = ci
+        self.name = name
+        self.last_name = last_name
+        self.validation_token = validation_token
+        self.save()
+
 
 class Vehicle(models.Model):
     customer = models.ForeignKey(Customer, on_delete=models.CASCADE, related_name='vehicles', default="0000000000")
@@ -49,12 +62,16 @@ class Vehicle(models.Model):
     color = models.CharField(max_length=30, default=None)
 
     def create_auto(self, customer, marca, model, placa, anio, color):
-            self.customer = customer
-            self.marca = marca
-            self.model = model
-            self.placa = placa
-            self.anio = anio
-            self.color = color
+        self.customer = customer
+        self.marca = marca
+        self.model = model
+        self.placa = placa
+        self.anio = anio
+        self.color = color
+
+    @staticmethod
+    def get_vehicle_by_placa(placa):
+        return Vehicle.objects.get(placa=placa)
 
     class Meta:
         db_table = 'mecanicaapp_vehicle'
@@ -65,21 +82,41 @@ class Vehicle(models.Model):
 
 
 class Admin(Person):
-    order = models.CharField(max_length=255, default=None)
+    def create_admin(self, name, last_name, token):
+        self.name = name
+        self.last_name = last_name
+        self.role = Person.Role.ADMIN.value
+        self.token = token
+        self.save()
 
 
 class Station(models.Model):
     station_name = models.CharField(max_length=30)
 
+    def create_station(self, station_name):
+        self.station_name = station_name
+
 
 class Employee(Person):
     station = models.ForeignKey(Station, on_delete=models.CASCADE, related_name='employees')
+
+    def create_employee(self, name, last_name, token, station):
+        self.name = name
+        self.last_name = last_name
+        self.role = Person.Role.EMPLOYEE.value
+        self.token = token
+        self.station = station
 
 
 class Service(models.Model):
     station = models.ForeignKey(Station, on_delete=models.CASCADE, related_name='servicios')
     name = models.CharField(max_length=255)
     description = models.TextField()
+
+    def create_service(self, station, name, description):
+        self.name = name
+        self.station = station
+        self.description = description
 
 
 class Order(models.Model):
@@ -95,3 +132,25 @@ class Order(models.Model):
 
     def __str__(self):
         return f'Orden de {self.customer.name} para {self.vehicle.placa}'
+
+
+class Payment(models.Model):
+    class State(Enum):
+        IN_PROGRESS = 'in progress'
+        ACCEPTED = 'accepted'
+        REJECTED = 'rejected'
+
+    state = models.CharField(max_length=100, choices=[(tag.name, tag.value) for tag in State],
+                             default=State.IN_PROGRESS.value)
+
+    class Meta:
+        abstract = True
+
+
+class Cash(Payment):
+    evidence = models.CharField(max_length=30, null=False, default="None")
+
+
+class BankCard(Payment):
+    tokenized_pin = models.CharField(max_length=30, null=False, default="None")
+    reference = models.CharField(max_length=30, null=False, default="None")

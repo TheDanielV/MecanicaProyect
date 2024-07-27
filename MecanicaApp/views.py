@@ -7,7 +7,7 @@ from .forms import *
 from services.AuthService.models import *
 from .utils import *
 from .models import *
-from django.db import IntegrityError
+from django.db import IntegrityError, transaction
 from django.http import HttpResponse
 from MecanicaApp.decorators import *
 
@@ -20,11 +20,29 @@ def index(request):
     client_ip = request.META.get('REMOTE_ADDR')
     print(client_ip)
     if request.session.get('token') is not None:
-        return redirect('mostrarAutos')
+        return redirect('default_view')
     else:
         return render(request, 'index.html', {
             'title': title
         })
+
+
+@role_login_required(allowed_roles=['admin', 'employee', 'customer'])
+def default_view(request):
+    if request.session.get('token') is not None:
+
+        persona = None
+        try:
+            persona = Customer.objects.get(token=request.session.get('token'))
+        except Customer.DoesNotExist:
+            try:
+                persona = Admin.objects.get(token=request.session.get('token'))
+            except Admin.DoesNotExist:
+                pass
+        if persona.role == 'admin':
+            return redirect("listar_ordenes")
+        elif persona.role == 'customer':
+            return redirect("mostrarAutos")
 
 
 def register(request):
@@ -40,16 +58,23 @@ def register(request):
                 customer.create(form.cleaned_data.get('name'), form.cleaned_data.get('last_name'),
                                 form.cleaned_data.get('ci'), form.cleaned_data.get('cellphone'),
                                 form.cleaned_data.get('direction'), token)
-                user.save(using=AUTH_DATABASE)
-                customer.save(using='default')
-                return render(request, 'index.html', {
-                    'title': "Usuario Creado"
-                })
+                # 4 Transaction
+
+                with transaction.atomic(using=AUTH_DATABASE):
+                    user.save()
+                    with transaction.atomic(using='default'):
+                        customer.save()
+
             except IntegrityError as e:
                 # voy a reenviar el mismo formulario con los datos mismos datos, excepto contraseña
                 return render(request, 'AuthViews/register.html', {'form': form, 'error': e})
             except InvalidPassword as e:
                 return render(request, 'AuthViews/register.html', {'form': form, 'error': e})
+
+            # en caso de no ocurrir ningun error
+            return render(request, 'index.html', {
+                'title': "Usuario Creado"
+            })
     else:
         # Si es una solicitud GET, mostrar el formulario vacío
         form = registerForm()
@@ -63,10 +88,11 @@ def login(request):
             auth_user = AuthUser()
             auth_key = auth_user.is_authorized(form.cleaned_data.get('user'),
                                                form.cleaned_data.get('password'))
-            print("a")
             if auth_key is not None:
                 request.session['token'] = auth_key
-                return redirect("mostrarAutos")
+                # Redirección en base a roles
+                return redirect('default_view')
+
             else:
                 return render(request, 'AuthViews/login.html', {'form': form, 'error': 'Invalid credentials'})
     else:
@@ -213,9 +239,17 @@ def logout_user(request):
     logout(request)
     return redirect('index')
 
-def ordenar_servicio(request):
-    return render(request, 'MainApp/orderServicio.html')
 
+@role_login_required(allowed_roles=['customer'])
+def ordenar_servicio(request, id):
+    vehicle = Vehicle.get_vehicle_by_placa(id)
+    if vehicle.customer.token == request.session.get('token'):
+        return render(request, 'MainApp/orderServicio.html', context={'vechicle': vehicle})
+    else:
+        return redirect('mostrarAutos')
+
+
+@role_login_required(allowed_roles=['admin'])
 def listar_ordenes(request):
     ordenes = [
         {
@@ -242,8 +276,9 @@ def listar_ordenes(request):
     ]
     return render(request, 'MainApp/contentOrdenes.html', {'ordenes': ordenes})
 
-def detalle_orden(request, id):
 
+@role_login_required(allowed_roles=['admin'])
+def detalle_orden(request, id):
     orden = {
         'id': id,
         'fecha': '2023-07-10',
@@ -263,4 +298,32 @@ def detalle_orden(request, id):
         }
     ]
     valor_total = sum(servicio['total'] for servicio in servicios)
-    return render(request, 'MainApp/contentDetalleOrden.html', {'orden': orden, 'servicios': servicios, 'valor_total': valor_total})
+    return render(request, 'MainApp/contentDetalleOrden.html',
+                  {'orden': orden, 'servicios': servicios, 'valor_total': valor_total})
+
+
+def upload_qr(request):
+    if request.method == 'POST':
+        form = QRCodeForm(request.POST, request.FILES)
+        if form.is_valid():
+            qr_image = form.cleaned_data['qr_code']
+            qr_image_bytes = BytesIO(qr_image.read())
+
+            # decrypted_data = read_qr_code(qr_image_bytes)
+            # obj_dict = json.loads(decrypted_data) if decrypted_data else None
+
+            return render(request, 'QR/result.html', {'data': "n"})
+
+    else:
+        form = QRCodeForm()
+    return render(request, 'QR/upload_qr.html', {'form': form})
+
+
+def create_admin(request):
+    auth = AuthUser()
+    token = auth.create_user(password="Password1020", username='Admin', email='admin@admin.com')
+    auth.save()
+    admin = Admin()
+    admin.create_admin("daniel", "vargas", token)
+    admin.save()
+    return redirect('login')
