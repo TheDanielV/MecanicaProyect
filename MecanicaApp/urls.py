@@ -29,5 +29,11 @@ urlpatterns = [
 
     # Para el qr
     path('upload_qr/', views.upload_qr, name='upload_qr'),
+    # Lo de mis amiguitos
+    path('payment/', views.payment, name='payment'),
+    path('transferencia/', views.transferencia, name='transferencia'),
+    path('retirarAuto/', views.retirarAuto, name='retirarAuto'),
+    path('success/', views.success, name='success'),
+    path('subirQR/', views.subirQR, name='subirQR'),
 
 ]
