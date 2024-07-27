@@ -27,8 +27,6 @@ urlpatterns = [
     # Para crear un admin base
     path('admin/create/', views.create_admin, name='create_admin'),
 
-    # Para el qr
-    path('upload_qr/', views.upload_qr, name='upload_qr'),
     # Lo de mis amiguitos
     path('payment/', views.payment, name='payment'),
     path('transferencia/', views.transferencia, name='transferencia'),

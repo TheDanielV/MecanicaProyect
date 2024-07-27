@@ -330,7 +330,10 @@ def create_admin(request):
     admin.create_admin("daniel", "vargas", token)
     admin.save()
     return redirect('login')
-    return render(request, 'MainApp/contentDetalleOrden.html', {'orden': orden, 'servicios': servicios, 'valor_total': valor_total})
+    return render(request, 'MainApp/contentDetalleOrden.html',
+                  {'orden': orden, 'servicios': servicios, 'valor_total': valor_total})
+
+
 @role_login_required(allowed_roles=['customer'])
 def payment(request):
     if request.method == 'POST':
@@ -357,6 +360,7 @@ def transferencia(request):
         form = TransferenciaForm()
     return render(request, 'MainApp/contentTransferencia.html', {'form': form})
 
+
 @role_login_required(allowed_roles=['customer'])
 def retirarAuto(request):
     if request.method == 'POST':
@@ -368,21 +372,22 @@ def retirarAuto(request):
             # cellphone = form.cleaned_data['cellphone']
             # ci = form.cleaned_data['ci']
             # file = form.cleaned_data['file']
-
-
             # Redirige a una página de éxito
             return redirect('success')
     else:
         form = retirarAutoForm()
     return render(request, 'MainApp/contentRetirarAuto.html', {'form': form})
 
+
 def success(request):
     return render(request, 'MainApp/success.html')
+
 
 def subirQR(request):
     return render(request, 'MainApp/subirQR.html')
 
 
+@role_login_required(allowed_roles=['admin'])
 def mostrar_servicios(request):
     services = [
         {"id": 1, "nombre": "Servicio 1", "descripcion": "Desdddddción 1", "precio": 100},
@@ -392,8 +397,10 @@ def mostrar_servicios(request):
     context = {
         'services': services
     }
-    return render(request, 'MainApp/contentServices.html',context)
+    return render(request, 'MainApp/contentServices.html', context)
 
+
+@role_login_required(allowed_roles=['admin'])
 def crearServicios(request):
     if request.method == 'POST':
         form = crearServicioForm(request.POST)

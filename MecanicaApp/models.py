@@ -44,6 +44,8 @@ class Guest(models.Model):
     name = models.CharField(max_length=30, default="None")
     last_name = models.CharField(max_length=30, null=False, default="None")
     validation_token = models.CharField(max_length=50, default=None)
+    file = models.FileField(upload_to='files/')
+    image = models.ImageField(upload_to='images/', null=True, blank=True)
 
     def create_guest(self, ci, name, last_name, validation_token):
         self.ci = ci
