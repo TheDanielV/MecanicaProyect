@@ -42,5 +42,6 @@ urlpatterns = [
     path("editar_servicio/<str:service_name>/", views.editarServicios, name='editar_servicio'),
 
 
+    path('admin/customers/', views.admin_customer_list, name='admin_customer_list'),
 
 ]
