@@ -1,3 +1,4 @@
+from MecanicaApp.models import Station
 from django import forms
 from django.core.exceptions import ValidationError
 
@@ -89,6 +90,15 @@ class crearServicioForm(forms.Form):
             'class': 'form-control mt-2'
         })
     )
+    estacionServicio = forms.ModelChoiceField(
+        label="Estación",
+        queryset=Station.objects.all(),
+        widget=forms.Select(attrs={
+            'class': 'form-control mt-2'
+        })
+    )
+
+
 
     def clean_precioServicio(self):
         precio = self.cleaned_data.get('precioServicio')
