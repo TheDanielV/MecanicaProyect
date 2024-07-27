@@ -1,10 +1,11 @@
 import os
-
+import string
+import random
 from django.contrib import messages
 from django.contrib.auth import logout
 from django.shortcuts import render, redirect, get_object_or_404
 from docutils.nodes import description
-
+from pyzbar.pyzbar import decode
 from .forms import *
 from django.shortcuts import render, redirect
 from .forms import registerForm, loginForm, crearServicioForm
@@ -43,11 +44,16 @@ def default_view(request):
             try:
                 persona = Admin.objects.get(token=request.session.get('token'))
             except Admin.DoesNotExist:
-                pass
+                try:
+                    persona = Employee.objects.get(token=request.session.get('token'))
+                except Employee.DoesNotExist:
+                    pass
         if persona.role == 'admin':
             return redirect("listar_ordenes")
         elif persona.role == 'customer':
             return redirect("mostrarAutos")
+        elif persona.role == 'employee':
+            return redirect('mostrarEstacion')
 
 
 def register(request):
@@ -255,57 +261,34 @@ def ordenar_servicio(request, id):
         return redirect('mostrarAutos')
 
 
+@role_login_required(allowed_roles=['customer'])
+def generate_order(request):
+    if request.method == 'POST':
+        vehicle = Vehicle.get_vehicle_by_placa(request.POST.get('placa'))
+        if vehicle.customer.token == request.session.get('token'):
+            customer = Customer.get_customer(request.session.get('token'))
+            services = Service.get_service_list_by_names(request.POST.getlist('servicios'))
+            order = Order()
+            order.generate_order(customer, vehicle, services)
+            return redirect('mostrarAutos')
+        else:
+            return redirect('mostrarAutos')
+    else:
+        redirect('default_view')
+
+
 @role_login_required(allowed_roles=['admin'])
 def listar_ordenes(request):
-    ordenes = [
-        {
-            'id': 1,
-            'cliente': {'nombre': 'Juan Pérez'},
-            'placa': 'PCM-6769',
-            'valor_total': 15000,
-            'estado': 'Pagado'
-        },
-        {
-            'id': 2,
-            'cliente': {'nombre': 'Ana López'},
-            'placa': 'PDB-1856',
-            'valor_total': 18000,
-            'estado': 'No Pagado'
-        },
-        {
-            'id': 3,
-            'cliente': {'nombre': 'Luis Martínez'},
-            'placa': 'PBB-1412',
-            'valor_total': 20000,
-            'estado': 'Pagado'
-        }
-    ]
-    return render(request, 'MainApp/contentOrdenes.html', {'ordenes': ordenes})
+    ordenes = Order.get_orders()
+    return render(request, 'MainApp/AdminViews/contentOrdenes.html', {'ordenes': ordenes})
 
 
 @role_login_required(allowed_roles=['admin'])
 def detalle_orden(request, id):
-    orden = {
-        'id': id,
-        'fecha': '2023-07-10',
-        'cliente': {'nombre': 'Juan Pérez'},
-        'vehiculo': 'PCM-6769'
-    }
-    servicios = [
-        {
-            'codigo': 1,
-            'descripcion': 'Cambio de aceite',
-            'total': 50.00
-        },
-        {
-            'codigo': 2,
-            'descripcion': 'Revisión de frenos',
-            'total': 30.00
-        }
-    ]
-    valor_total = sum(servicio['total'] for servicio in servicios)
-    return render(request, 'MainApp/contentDetalleOrden.html',
-                  {'orden': orden, 'servicios': servicios, 'valor_total': valor_total})
+    orden = Order.get_order_by_id(id)
+    valor_total = 0
+    return render(request, 'MainApp/AdminViews/contentDetalleOrden.html',
+                  {'orden': orden, 'servicios': orden.service.all(), 'valor_total': valor_total})
 
 
 def upload_qr(request):
@@ -333,7 +316,7 @@ def create_admin(request):
     admin.create_admin("daniel", "vargas", token)
     admin.save()
     return redirect('login')
-    return render(request, 'MainApp/contentDetalleOrden.html',
+    return render(request, 'MainApp/AdminViews/contentDetalleOrden.html',
                   {'orden': orden, 'servicios': servicios, 'valor_total': valor_total})
 
 
@@ -387,7 +370,21 @@ def success(request):
 
 
 def subirQR(request):
-    return render(request, 'MainApp/subirQR.html')
+    if request.method == 'POST':
+        form = QRCodeForm(request.POST, request.FILES)
+        if form.is_valid():
+            image = form.cleaned_data['qr_code']
+            try:
+                img = Image.open(image)
+                decoded_objects = decode(img)
+                qr_content = [obj.data.decode('utf-8') for obj in decoded_objects]
+                print(qr_content)
+                return render(request, 'QR/result.html', {'data': qr_content})
+            except (IOError, ValueError) as e:
+                return render(request, 'AuthViews/login.html', {'error': str(e)})
+    else:
+        form = QRCodeForm()
+        return render(request, 'MainApp/subirQR.html', {'form': form})
 
 
 @role_login_required(allowed_roles=['admin'])
@@ -396,7 +393,7 @@ def mostrar_servicios(request):
     context = {
         'services': services
     }
-    return render(request, 'MainApp/contentServices.html', context)
+    return render(request, 'MainApp/AdminViews/contentServices.html', context)
 
 
 @role_login_required(allowed_roles=['admin'])
@@ -410,9 +407,10 @@ def crearServicios(request):
             return redirect('mostrarServicios')
     else:
         form = crearServicioForm()
-    return render(request, 'MainApp/crear_servicio.html', {'form': form})
+    return render(request, 'MainApp/AdminViews/crear_servicio.html', {'form': form})
 
 
+@role_login_required(allowed_roles=['admin'])
 def editarServicios(request, service_name):
     servicio = Service.get_service_by_name(service_name=service_name)
     if request.method == 'POST':
@@ -431,4 +429,42 @@ def editarServicios(request, service_name):
             'precioServicio': 0,
         })
 
-    return render(request, 'MainApp/editar_servicio.html', {'form': form, 'service_id': service_name})
+    return render(request, 'MainApp/AdminViews/editar_servicio.html', {'form': form, 'service_id': service_name})
+
+
+@role_login_required(['admin'])
+def agregar_empleado(request):
+    if request.method == 'POST':
+        nombre = request.POST.get('nombre')
+        apellido = request.POST.get('apellido')
+        estacion_name = request.POST.get('estacion')
+        email = request.POST.get('email')
+
+        try:
+            user = AuthUser()
+            employee = Employee()
+            password_char = string.ascii_letters + string.digits
+            password = ''.join(random.choice(password_char) for _ in range(8))
+
+            while not (any(c.isupper() for c in password) and any(c.isdigit() for c in password)):
+                password = ''.join(random.choice(password_char) for _ in range(8))
+
+            username = "emp" + nombre + apellido
+
+            token = user.create_user(username, password, email)
+            employee.create_employee(nombre, apellido, token, Station.get_station_by_name(estacion_name))
+            # 4 Transaction
+            with transaction.atomic(using=AUTH_DATABASE):
+                user.save()
+                with transaction.atomic(using='default'):
+                    employee.save()
+                    send_credentias_email(email, username, password)
+        except IntegrityError as e:
+            return render(request, 'MainApp/AdminViews/registratEmpleado.html', {'error': e})
+        except InvalidPassword as e:
+            return render(request, 'MainApp/AdminViews/registratEmpleado.html', {'error': e})
+
+        return redirect('listar_ordenes')
+    else:
+        estaciones = Station.get_stations()
+        return render(request, 'MainApp/AdminViews/registratEmpleado.html', {'estaciones': estaciones})

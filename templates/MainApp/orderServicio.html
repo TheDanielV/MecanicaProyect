@@ -7,7 +7,7 @@
 <div class="container mt-4 d-flex justify-content-center">
 
     <!-- Formulario Registro de Vehiculo-->
-    <form id="formularioServicio" method="post" action='{% url 'ordenarServicio' id=vechicle.placa %}' class="w-50">
+    <form id="formularioServicio" method="post" action='{% url 'generarOrden'%}' class="w-50">
         {% csrf_token %}
 
         <!-- Información del vehículo en una tarjeta -->
@@ -25,11 +25,11 @@
         </div>
 
         <!-- Información del vehículo (datos ocultos) -->
-        <input type="hidden" id="año" name="año" value="2008">
-        <input type="hidden" id="marca" name="marca" value="Chevrolet">
-        <input type="hidden" id="modelo" name="modelo" value="Aveo">
-        <input type="hidden" id="placa" name="placa" value="PDB-1856">
-        <input type="hidden" id="color" name="color" value="Plata">
+        <input type="hidden" id="año" name="año" value="{{vechicle.anio}}">
+        <input type="hidden" id="marca" name="marca" value="{{vechicle.marca}}">
+        <input type="hidden" id="modelo" name="modelo" value="{{vechicle.model}}">
+        <input type="hidden" id="placa" name="placa" value="{{vechicle.placa}}">
+        <input type="hidden" id="color" name="color" value="{{vechicle.color}}">
 
         <!-- Sección de selección de servicios -->
         <div class="form-group mb-3">
@@ -44,9 +44,6 @@
                         </label>
                     </div>
                 {% endfor %}
-
-
-
             </div>
         </div>
 

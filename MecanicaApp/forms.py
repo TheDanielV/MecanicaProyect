@@ -93,7 +93,35 @@ class PaymentForm(forms.Form):
         ('ventanilla', 'Pago en ventanilla'),
     ]
 
+    metodo_pago = forms.ChoiceField(
+        choices=METODO_PAGO_CHOICES,
+        widget=forms.RadioSelect(attrs={'class': 'radio-label'})
+    )
 
+
+class TransferenciaForm(forms.Form):
+    file = forms.FileField(label='Selecciona un archivo', widget=forms.ClearableFileInput(
+        attrs={'class': 'form-control', 'id': 'formFile', 'accept': 'image/*,.pdf'}))
+
+
+class retirarAutoForm(forms.Form):
+    name = forms.CharField(label="Nombre", max_length=200, widget=forms.TextInput(
+        attrs={'class': 'input form-control', 'placeholder': 'Ingrese su nombre'}))
+    last_name = forms.CharField(label="Apellido", max_length=200, widget=forms.TextInput(
+        attrs={'class': 'input form-control', 'placeholder': 'Ingrese su apellido'}))
+    cellphone = forms.CharField(label="Teléfono", max_length=200, widget=forms.NumberInput(
+        attrs={'class': 'input form-control', 'placeholder': 'Ingrese su teléfono'}))
+    ci = forms.CharField(label="Cédula", max_length=200, widget=forms.NumberInput(
+        attrs={'class': 'input form-control', 'placeholder': 'Ingrese su cédula'}))
+    file = forms.FileField(label='Subir cédula en imagen o pdf', widget=forms.ClearableFileInput(
+        attrs={'class': 'form-control', 'id': 'formFile', 'accept': 'image/*,.pdf'}))
+
+
+class PaymentForm(forms.Form):
+    METODO_PAGO_CHOICES = [
+        ('transferencia', 'Transferencia'),
+        ('ventanilla', 'Pago en ventanilla'),
+    ]
 
     metodo_pago = forms.ChoiceField(
         choices=METODO_PAGO_CHOICES,
@@ -117,29 +145,18 @@ class retirarAutoForm(forms.Form):
         attrs={'class': 'input form-control', 'placeholder': 'Ingrese su cédula'}))
     file = forms.FileField(label='Subir cédula en imagen o pdf', widget=forms.ClearableFileInput(
         attrs={'class': 'form-control', 'id': 'formFile', 'accept': 'image/*,.pdf'}))
-class PaymentForm(forms.Form):
-    METODO_PAGO_CHOICES = [
-        ('transferencia', 'Transferencia'),
-        ('ventanilla', 'Pago en ventanilla'),
-    ]
 
-    metodo_pago = forms.ChoiceField(
-        choices=METODO_PAGO_CHOICES,
-        widget=forms.RadioSelect(attrs={'class': 'radio-label'})
+
+# 4 QR
+class QRCodeForm(forms.Form):
+    qr_code = forms.ImageField(
+        label="Sube tu código QR",
+        widget=forms.ClearableFileInput(
+            attrs={
+                'class': 'form-control',
+                'id': 'formFile',
+                'accept': 'image/*',
+                'style': 'max-width: 560px; width: 100%; font-size: 20px;'
+            }
+        )
     )
-
-class TransferenciaForm(forms.Form):
-    file = forms.FileField(label='Selecciona un archivo', widget=forms.ClearableFileInput(
-        attrs={'class': 'form-control', 'id': 'formFile', 'accept': 'image/*,.pdf'}))
-
-class retirarAutoForm(forms.Form):
-    name = forms.CharField(label="Nombre", max_length=200, widget=forms.TextInput(
-        attrs={'class': 'input form-control', 'placeholder': 'Ingrese su nombre'}))
-    last_name = forms.CharField(label="Apellido", max_length=200, widget=forms.TextInput(
-        attrs={'class': 'input form-control', 'placeholder': 'Ingrese su apellido'}))
-    cellphone = forms.CharField(label="Teléfono", max_length=200, widget=forms.NumberInput(
-        attrs={'class': 'input form-control', 'placeholder': 'Ingrese su teléfono'}))
-    ci = forms.CharField(label="Cédula", max_length=200, widget=forms.NumberInput(
-        attrs={'class': 'input form-control', 'placeholder': 'Ingrese su cédula'}))
-    file = forms.FileField(label='Subir cédula en imagen o pdf',widget=forms.ClearableFileInput(
-        attrs={'class': 'form-control','id': 'formFile','accept': 'image/*,.pdf'}))

@@ -66,8 +66,8 @@
               {% for orden in ordenes %}
               <tr>
                 <td>{{ orden.id }}</td>
-                <td>{{ orden.cliente.nombre }}</td>
-                <td>{{ orden.placa }}</td>
+                <td>{{ orden.customer.name}} {{ orden.customer.last_name }}</td>
+                <td>{{ orden.vehicle.placa }}</td>
                 <td>{{ orden.valor_total }}</td>
                 <td>{{ orden.estado }}</td>
                 <td>

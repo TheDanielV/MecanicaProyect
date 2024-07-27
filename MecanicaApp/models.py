@@ -26,6 +26,7 @@ class Customer(Person):
     direction = models.CharField(max_length=255, default="None")
 
     def create(self, name, last_name, ci, cellphone, direction, token):
+
         self.name = name
         self.token = token
         self.last_name = last_name
@@ -110,17 +111,21 @@ class Station(models.Model):
         return self
 
     @classmethod
-    def get_station_by_id(cls, station_id):
+    def get_station_by_name(cls, station_name):
         """
-        Obtiene una estación por su ID.
+        Obtiene una estación por su nombre.
 
         Args:
-            station_id (int): El ID de la estación.
+            station_name (str): El nombre de la estación.
 
         Returns:
             Station: La instancia de la estación encontrada.
         """
-        return cls.objects.get(id=station_id)
+        return cls.objects.get(station_name=station_name)
+
+    @classmethod
+    def get_stations(cls):
+        return cls.objects.all()
 
 
 class Employee(Person):
@@ -179,20 +184,38 @@ class Service(models.Model):
     def update_service(self):
         self.save()
 
+    @classmethod
+    def get_service_list_by_names(cls, services_raw):
+        return cls.objects.filter(name__in=services_raw)
+
 
 class Order(models.Model):
     customer = models.ForeignKey(Customer, on_delete=models.CASCADE, related_name='ordenes')
     vehicle = models.ForeignKey(Vehicle, on_delete=models.CASCADE, related_name='ordenes')
-    service = models.ManyToManyField(Service, related_name='ordenes')
+    service = models.ManyToManyField(Service)
 
     #  payment = models.CharField(max_length=2, choices=METODO_PAGO_CHOICES)
 
-    def create(self, customer, vehicle):
+    def generate_order(self, customer, vehicle, services):
+
         self.customer = customer
         self.vehicle = vehicle
+        self.save()
+        self.service.set(services)
+        self.save()
+
+
+
+    @classmethod
+    def get_orders(cls):
+        return cls.objects.all()
 
     def __str__(self):
         return f'Orden de {self.customer.name} para {self.vehicle.placa}'
+
+    @classmethod
+    def get_order_by_id(cls, order_id):
+        return cls.objects.get(id=order_id)
 
 
 class Payment(models.Model):

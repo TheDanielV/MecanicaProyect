@@ -21,9 +21,12 @@ urlpatterns = [
     path('eliminarAuto/<int:auto_id>/', views.eliminar_auto, name='eliminarAuto'),
     path('logout/', views.logout_user, name='logout'),
     path("ordenarServicio/<str:id>/", views.ordenar_servicio, name="ordenarServicio"),
+    path("generarOrden/", views.generate_order, name="generarOrden"),
     path("ordenes/", views.listar_ordenes, name="listar_ordenes"),
     path('orden/<int:id>/', views.detalle_orden, name='detalle_orden'),
 
+    # para registrar un empleado
+    path('registrarEmpleado/', views.agregar_empleado, name='registrarEmpleado'),
     # Para crear un admin base
     path('admin/create/', views.create_admin, name='create_admin'),
 
@@ -33,15 +36,15 @@ urlpatterns = [
     path('retirarAuto/', views.retirarAuto, name='retirarAuto'),
     path('success/', views.success, name='success'),
     path('subirQR/', views.subirQR, name='subirQR'),
-    path("registrarAuto/",views.registrar_auto,name="registrarAuto"),
+    path("registrarAuto/", views.registrar_auto,name="registrarAuto"),
 
-    path("mostrarServicios/",views.mostrar_servicios, name='mostrarServicios'),
+    path("mostrarServicios/", views.mostrar_servicios, name='mostrarServicios'),
 
     path("crearServicio/", views.crearServicios, name="crearServicio"),
 
     path("editar_servicio/<str:service_name>/", views.editarServicios, name='editar_servicio'),
 
 
-    path('admin/customers/', views.admin_customer_list, name='admin_customer_list'),
+    # path('admin/customers/', views.admin_customer_list, name='admin_customer_list'),
 
 ]

@@ -3,9 +3,15 @@ from io import BytesIO
 from PIL.Image import Image
 from django.forms.models import model_to_dict
 from django.core.serializers.json import DjangoJSONEncoder
-from django.conf import settings
 import qrcode
 import json
+
+from django.conf import settings
+from django.core.mail import EmailMessage
+from django.template.loader import render_to_string
+import logging
+
+from django.template.loader import render_to_string
 from nacl.secret import SecretBox
 from nacl.encoding import Base64Encoder
 
@@ -103,3 +109,27 @@ def read_qr_code(image):
     decoded_objects = decode(img)
     qr_content = [obj.data.decode('utf-8') for obj in decoded_objects]
     return qr_content
+
+
+def send_credentias_email(user_email, user, password):
+    subject = 'Credenciales de acceso'
+    message = f'Tu Usuario es: {user} y tu contraseña es: {password}'
+
+    template = render_to_string('email.html', {
+        'message': message
+    })
+
+    email = EmailMessage(
+        subject,
+        template,
+        from_email=settings.EMAIL_HOST_USER,
+        to=[user_email]
+    )
+    email.fail_silently = False
+
+    try:
+        email.send()
+        return True
+    except Exception as e:
+        print(e)
+        return False
