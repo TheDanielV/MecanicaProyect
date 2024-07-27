@@ -396,33 +396,19 @@ def crearServicios(request):
     return render(request, 'MainApp/crear_servicio.html', {'form': form})
 
 
-def editarServicios(request, service_id):
-    servicios_data = [
-        {"id": 1, "nombre": "Servicio 1", "descripcion": "Descripción 1", "precio": 100,"estacion":"Cambiar aceite"},
-        {"id": 2, "nombre": "Servicio 2", "descripcion": "Descripción 2", "precio": 200,"estacion":"Cambiar aceite"},
-        # Agrega más servicios según sea necesario
-    ]
 
+def editarServicios(request, service_id):
     # Encuentra el servicio por su id
-    servicio = next((s for s in servicios_data if s["id"] == service_id), None)
-    if not servicio:
-        return render(request, '404.html', status=404)
+    servicio = get_object_or_404(Service, id=service_id)
 
     if request.method == 'POST':
-        form = crearServicioForm(request.POST)
+        # Pasar la instancia del servicio al formulario
+        form = crearServicioForm(request.POST, instance=servicio)
         if form.is_valid():
-            # Aquí puedes simular la actualización del servicio
-            servicio["nombre"] = form.cleaned_data['nombreServicio']
-            servicio["descripcion"] = form.cleaned_data['descripcionServicio']
-            servicio["precio"] = form.cleaned_data['precioServicio']
-            servicio["estacion"] = form.cleaned_data['estacionServicio']
+            form.save()  # Guarda los cambios en el modelo
             return redirect('mostrarServicios')  # Redirige a la lista de servicios (deberás definir esta vista)
     else:
-        form = crearServicioForm(initial={
-            'nombreServicio': servicio['nombre'],
-            'descripcionServicio': servicio['descripcion'],
-            'precioServicio': servicio['precio'],
-            'estacionServicio': servicio['estacion'],
-        })
+        # Inicializar el formulario con los datos actuales del servicio
+        form = crearServicioForm(instance=servicio)
 
     return render(request, 'MainApp/editar_servicio.html', {'form': form, 'service_id': service_id})
