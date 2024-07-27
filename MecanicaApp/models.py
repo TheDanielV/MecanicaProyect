@@ -96,7 +96,31 @@ class Station(models.Model):
     station_name = models.CharField(max_length=30)
 
     def create_station(self, station_name):
+        """
+        Crea una nueva estación y la guarda en la base de datos.
+
+        Args:
+            station_name (str): El nombre de la estación.
+
+        Returns:
+            Station: La instancia de la estación creada.
+        """
         self.station_name = station_name
+        self.save()
+        return self
+
+    @classmethod
+    def get_station_by_id(cls, station_id):
+        """
+        Obtiene una estación por su ID.
+
+        Args:
+            station_id (int): El ID de la estación.
+
+        Returns:
+            Station: La instancia de la estación encontrada.
+        """
+        return cls.objects.get(id=station_id)
 
 
 class Employee(Person):
@@ -111,14 +135,49 @@ class Employee(Person):
 
 
 class Service(models.Model):
-    station = models.ForeignKey(Station, on_delete=models.CASCADE, related_name='servicios')
-    name = models.CharField(max_length=255)
+    station = models.ForeignKey(Station, on_delete=models.CASCADE, related_name='services')
+    name = models.CharField(max_length=255, unique=True)
     description = models.TextField()
 
     def create_service(self, station, name, description):
-        self.name = name
+        """
+        Crea un nuevo servicio asociado a una estación.
+
+        Este método asigna los valores proporcionados a los atributos del servicio y guarda el objeto en la base de datos.
+
+        Args:
+            station (Station): La estación con la que se asocia el servicio.
+            name (str): El nombre del servicio.
+            description (str): Una breve descripción del servicio.
+
+        Returns:
+            Service: La instancia del servicio creado.
+        """
         self.station = station
+        self.name = name
         self.description = description
+        self.save()
+        return self
+
+    @classmethod
+    def get_service_by_name(cls, service_name):
+        """
+        Obtiene un servicio por su Nombre.
+
+        Args:
+            service_name (str): El Nombre del servicio.
+
+        Returns:
+            Service: La instancia del servicio encontrado.
+        """
+        return cls.objects.get(name=service_name)
+
+    @classmethod
+    def get_services(cls):
+        return cls.objects.all()
+
+    def update_service(self):
+        self.save()
 
 
 class Order(models.Model):

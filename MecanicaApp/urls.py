@@ -12,7 +12,6 @@ urlpatterns = [
     path('generate_qr/', views.qr_code_view, name='generate_qr'),
     path('login/', views.login, name='login'),
     path("mostrarAutos/", views.mostrar_autos, name="mostrarAutos"),
-<<<<<<<<< Temporary merge branch 1
     path("registrarAuto/", views.registrar_auto, name="registrarAuto"),
     path("mostrarEstacion/", views.mostrar_estacion, name="mostrarEstacion"),
     path("enviarCorreo/",views.token_sended_test, name="enviarCorreo"),
@@ -40,7 +39,7 @@ urlpatterns = [
 
     path("crearServicio/", views.crearServicios, name="crearServicio"),
 
-    path("editar_servicio/<int:service_id>/", views.editarServicios, name='editar_servicio'),
+    path("editar_servicio/<str:service_name>/", views.editarServicios, name='editar_servicio'),
 
 
 

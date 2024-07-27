@@ -3,11 +3,11 @@ import os
 from django.contrib import messages
 from django.contrib.auth import logout
 from django.shortcuts import render, redirect, get_object_or_404
+from docutils.nodes import description
+
 from .forms import *
-=========
 from django.shortcuts import render, redirect
 from .forms import registerForm, loginForm, crearServicioForm
->>>>>>>>> Temporary merge branch 2
 from services.AuthService.models import *
 from .utils import *
 from .models import *
@@ -63,11 +63,13 @@ def register(request):
                 customer.create(form.cleaned_data.get('name'), form.cleaned_data.get('last_name'),
                                 form.cleaned_data.get('ci'), form.cleaned_data.get('cellphone'),
                                 form.cleaned_data.get('direction'), token)
-                user.save(using=AUTH_DATABASE)
-                customer.save(using='default')
-                return render(request, 'index.html', {
-                    'title': "Usuario Creado"
-                })
+                # 4 Transaction
+
+                with transaction.atomic(using=AUTH_DATABASE):
+                    user.save()
+                    with transaction.atomic(using='default'):
+                        customer.save()
+
             except IntegrityError as e:
                 # voy a reenviar el mismo formulario con los datos mismos datos, excepto contraseña
                 return render(request, 'AuthViews/register.html', {'form': form, 'error': e})
@@ -247,7 +249,8 @@ def logout_user(request):
 def ordenar_servicio(request, id):
     vehicle = Vehicle.get_vehicle_by_placa(id)
     if vehicle.customer.token == request.session.get('token'):
-        return render(request, 'MainApp/orderServicio.html', context={'vechicle': vehicle})
+        services = Service.get_services()
+        return render(request, 'MainApp/orderServicio.html', context={'vechicle': vehicle, 'services': services})
     else:
         return redirect('mostrarAutos')
 
@@ -387,14 +390,9 @@ def subirQR(request):
     return render(request, 'MainApp/subirQR.html')
 
 
-
 @role_login_required(allowed_roles=['admin'])
 def mostrar_servicios(request):
-    services = [
-        {"id": 1, "nombre": "Servicio 1", "descripcion": "Desdddddción 1", "precio": 100},
-        {"id": 2, "nombre": "Servicio 2", "descripcion": "Descripción 2", "precio": 200},
-        # Agrega más servicios según sea necesario
-    ]
+    services = Service.get_services()
     context = {
         'services': services
     }
@@ -415,33 +413,22 @@ def crearServicios(request):
     return render(request, 'MainApp/crear_servicio.html', {'form': form})
 
 
-def editarServicios(request, service_id):
-    servicios_data = [
-        {"id": 1, "nombre": "Servicio 1", "descripcion": "Descripción 1", "precio": 100},
-        {"id": 2, "nombre": "Servicio 2", "descripcion": "Descripción 2", "precio": 200},
-        # Agrega más servicios según sea necesario
-    ]
-
-    # Encuentra el servicio por su id
-    servicio = next((s for s in servicios_data if s["id"] == service_id), None)
-    if not servicio:
-        return render(request, '404.html', status=404)
-
+def editarServicios(request, service_name):
+    servicio = Service.get_service_by_name(service_name=service_name)
     if request.method == 'POST':
         form = crearServicioForm(request.POST)
         if form.is_valid():
             # Aquí puedes simular la actualización del servicio
-            servicio["nombre"] = form.cleaned_data['nombreServicio']
-            servicio["descripcion"] = form.cleaned_data['descripcionServicio']
-            servicio["precio"] = form.cleaned_data['precioServicio']
-            servicio["estacion"] = form.cleaned_data['estacionServicio']
+            servicio.name = form.cleaned_data['nombreServicio']
+            servicio.description = form.cleaned_data['descripcionServicio']
+            # TODO agregar precio
+            # servicio["precio"] = form.cleaned_data['precioServicio']
             return redirect('mostrarServicios')  # Redirige a la lista de servicios (deberás definir esta vista)
     else:
         form = crearServicioForm(initial={
-            'nombreServicio': servicio['nombre'],
-            'descripcionServicio': servicio['descripcion'],
-            'precioServicio': servicio['precio'],
-            'estacionServicio': servicio['estacion'],
+            'nombreServicio': servicio.name,
+            'descripcionServicio': servicio.description,
+            'precioServicio': 0,
         })
 
-    return render(request, 'MainApp/editar_servicio.html', {'form': form, 'service_id': service_id})
+    return render(request, 'MainApp/editar_servicio.html', {'form': form, 'service_id': service_name})

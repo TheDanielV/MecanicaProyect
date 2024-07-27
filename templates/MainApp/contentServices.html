@@ -19,11 +19,9 @@
             <table class="table table-bordered table-sm">
                 <thead  class="services-table">
                     <tr style="background-color: #A62D43; color: white">
-                        <th style="max-width: 100px;">ID</th>
                         <th style="max-width: 150px;">Nombre</th>
                         <th style="max-width: 200px;">Descripción</th>
                         <th style="max-width: 100px;">Precio</th>
-                        <th style = "max-width: 200px"> Estación</th>
                         <th style = "max-width: 200px"> Estación</th>
                         <th style="max-width: 150px;">Acciones</th>
                     </tr>
@@ -31,14 +29,13 @@
                 <tbody>
                     {% for service in services %}
                     <tr>
-                        <td class="text-wrap" style="word-break: break-word; max-width: 100px;">{{ service.id }}</td>
-                        <td class="text-wrap" style="word-break: break-word; max-width: 150px;">{{ service.nombre }}</td>
-                        <td class="text-wrap" style="word-break: break-word; max-width: 300px;">{{ service.descripcion }}</td>
-                        <td class="text-wrap" style="word-break: break-word; max-width: 100px;">{{ service.precio }}</td>
-                        <td class="text-wrap" style="word-break: break-word; max-width: 300px;">{{ service.estacion }}</td>
+                        <td class="text-wrap" style="word-break: break-word; max-width: 150px;">{{ service.name }}</td>
+                        <td class="text-wrap" style="word-break: break-word; max-width: 300px;">{{ service.description}}</td>
+                        <td class="text-wrap" style="word-break: break-word; max-width: 100px;">{{0 }}</td>
+                        <td class="text-wrap" style="word-break: break-word; max-width: 300px;">{{ service.station.station_name }}</td>
                         <td class="text-nowrap" style="word-break: break-word; max-width: 150px;">
-                            <a href="{% url 'editar_servicio' service.id %}" class="btn btn-outline-success btn-sm">✏️</a>
-                            <button onclick="eliminarServicio({{ service.id }})" class="btn btn-outline-danger btn-sm">🗑️</button>
+                            <a href="{% url 'editar_servicio' service.name %}" class="btn btn-outline-success btn-sm">✏️</a>
+                            <button onclick="eliminarServicio({{ service.name }})" class="btn btn-outline-danger btn-sm">🗑️</button>
                         </td>
                     </tr>
                     {% endfor %}

@@ -36,24 +36,16 @@
             <label for="servicios" class="form-label"><strong>Seleccione los servicios deseados:</strong></label>
            
             <div id="servicios">
-                <div class="form-check mb-2" style="padding-left: 1.5em;">
-                    <input class="form-check-input" type="checkbox" value="Cambio de aceite" id="cambioAceite" name="servicios">
-                    <label class="form-check-label" for="cambioAceite">
-                        Cambio de aceite
-                    </label>
-                </div>
-                <div class="form-check mb-2" style="padding-left: 1.5em;">
-                    <input class="form-check-input" type="checkbox" value="Alineación y balanceo" id="alineacionBalanceo" name="servicios">
-                    <label class="form-check-label" for="alineacionBalanceo">
-                        Alineación y balanceo
-                    </label>
-                </div>
-                <div class="form-check mb-2" style="padding-left: 1.5em;">
-                    <input class="form-check-input" type="checkbox" value="ABC de motor" id="abcMotor" name="servicios">
-                    <label class="form-check-label" for="abcMotor">
-                        ABC de motor
-                    </label>
-                </div>
+                {% for service in services %}
+                    <div class="form-check mb-2" style="padding-left: 1.5em;">
+                        <input class="form-check-input" type="checkbox" value="{{ service.name }}" id="{{ service.name }}" name="servicios">
+                        <label class="form-check-label" for="cambioAceite">
+                            {{ service.name }}: {{ service.description }}
+                        </label>
+                    </div>
+                {% endfor %}
+
+
 
             </div>
         </div>
