@@ -12,6 +12,14 @@ urlpatterns = [
     path('login/', views.login, name='login'),
     path("qr/", views.qr_code_view, name="qr"),
     path("mostrarAutos/", views.mostrar_autos, name="mostrarAutos"),
-    path("registrarAuto/",views.registrar_auto,name="registrarAuto")
+    path("registrarAuto/",views.registrar_auto,name="registrarAuto"),
+
+    path("mostrarServicios/",views.mostrar_servicios, name='mostrarServicios'),
+
+    path("crearServicio/", views.crearServicios, name="crearServicio"),
+
+    path("editar_servicio/<int:service_id>/", views.editarServicios, name='editar_servicio'),
+
+
 
 ]
