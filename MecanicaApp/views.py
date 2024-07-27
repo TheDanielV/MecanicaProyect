@@ -414,20 +414,19 @@ def crearServicios(request):
 def editarServicios(request, service_name):
     servicio = Service.get_service_by_name(service_name=service_name)
     if request.method == 'POST':
-        form = crearServicioForm(request.POST)
+        # Pasar la instancia del servicio al formulario
+        form = crearServicioForm(request.POST, instance=servicio)
         if form.is_valid():
             # Aquí puedes simular la actualización del servicio
             servicio.name = form.cleaned_data['nombreServicio']
             servicio.description = form.cleaned_data['descripcionServicio']
             # TODO agregar precio
             # servicio["precio"] = form.cleaned_data['precioServicio']
+            form.save()  # Guarda los cambios en el modelo
             return redirect('mostrarServicios')  # Redirige a la lista de servicios (deberás definir esta vista)
     else:
-        form = crearServicioForm(initial={
-            'nombreServicio': servicio.name,
-            'descripcionServicio': servicio.description,
-            'precioServicio': 0,
-        })
+        # Inicializar el formulario con los datos actuales del servicio
+        form = crearServicioForm(instance=servicio)
 
     return render(request, 'MainApp/AdminViews/editar_servicio.html', {'form': form, 'service_id': service_name})
 
