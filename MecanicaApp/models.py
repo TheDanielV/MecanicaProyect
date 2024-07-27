@@ -71,6 +71,9 @@ class Admin(Person):
 class Station(models.Model):
     station_name = models.CharField(max_length=30)
 
+    def __str__(self):
+        return self.station_name
+
 
 class Employee(Person):
     station = models.ForeignKey(Station, on_delete=models.CASCADE, related_name='employees')
