@@ -1,0 +1,74 @@
+{% extends 'base/autos.html' %}
+
+{% block content %}
+    <style>
+    .btn-submit {
+        background-color: #A62D43;
+        border-color: #A62D43;
+        color: white;
+        padding: 10px 20px;
+        border-radius: 5px;
+        cursor: pointer;
+        margin-right: 10px; 
+    }
+
+    .btn-submit:hover {
+        background-color: #8e2536;
+        border-color: #8e2536;
+    }
+
+    .btn-cancel {
+        background-color: #ccc;
+        border-color: #ccc;
+        color: black;
+        padding: 10px 20px;
+        border-radius: 5px;
+        cursor: pointer;
+    }
+
+    .btn-cancel:hover {
+        background-color: #999;
+        border-color: #999;
+    }
+
+    .button-group {
+        display: flex;
+        justify-content: center;
+    }
+    </style>
+<div class="container" style="max-width: 600px; margin: auto;">
+    <h2 class="text-center my-4">Datos para transferencia</h2>
+
+    <div class="card mb-4">
+        <div class="card-body">
+            <h3 class="card-title">Poli Banco</h3>
+            <p class="card-text"><strong>Cuenta de ahorros</strong></p>
+            <p class="card-text"><strong>Número de cuenta:</strong> 9999999999</p>
+            <p class="card-text"><strong>Nombre:</strong> MecHelp</p>
+            <p class="card-text"><strong>CI:</strong> 1111111111</p>
+            <p class="card-text"><strong>Correo:</strong> lubricadora@gmail.com</p>
+        </div>
+    </div>
+
+    <div class="card mb-4">
+        <div class="card-body">
+            <h3 class="card-title">Subir archivo</h3>
+            <form method="post" enctype="multipart/form-data">
+                {% csrf_token %}
+                <div class="mb-3">
+                    {{ form.file }}
+                </div>
+                <div class="button-group">
+                    <button type="submit" class="btn-submit" id="enviarButton">
+                        Enviar
+                    </button>
+                    <button type="button" class="btn-cancel" onclick="window.location.href='{% url 'mostrarAutos' %}'">
+                        Cancelar
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+</div>
+{% endblock %}

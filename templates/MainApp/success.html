@@ -1,0 +1,13 @@
+{% extends 'base/autos.html' %}
+
+{% block content %}
+<div class="container" style="max-width: 600px; margin: auto; margin-top: 50px;">
+    <div class="card mb-4">
+        <div class="card-body text-center">
+            <h3 class="card-title">¡Registro exitoso!</h3>
+            <p class="card-text">Tu formulario ha sido enviado con éxito. Gracias por tu colaboración.</p>
+            <a href="{% url 'mostrarAutos' %}" class="btn btn-primary">Volver a la página principal</a>
+        </div>
+    </div>
+</div>
+{% endblock %}

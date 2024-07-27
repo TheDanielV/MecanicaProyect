@@ -6,11 +6,9 @@
 
 <div class="container mt-4 d-flex justify-content-center">
 
-    <!-- Formulario Registro de Vehiculo-->
     <form id="formularioServicio" method="post" action='{% url 'ordenarServicio' %}' class="w-50">
         {% csrf_token %}
 
-        <!-- Información del vehículo en una tarjeta -->
         <div class="card mb-4" style="background-color: #F8E5E9; border-color: #A62D43;">
             <div class="card-header" style="background-color: #A62D43; color: white;">
                 Información del Vehículo
@@ -24,14 +22,7 @@
             </div>
         </div>
 
-        <!-- Información del vehículo (datos ocultos) -->
-        <input type="hidden" id="año" name="año" value="2008">
-        <input type="hidden" id="marca" name="marca" value="Chevrolet">
-        <input type="hidden" id="modelo" name="modelo" value="Aveo">
-        <input type="hidden" id="placa" name="placa" value="PDB-1856">
-        <input type="hidden" id="color" name="color" value="Plata">
 
-        <!-- Sección de selección de servicios -->
         <div class="form-group mb-3">
             <label for="servicios" class="form-label"><strong>Seleccione los servicios deseados:</strong></label>
            
@@ -54,7 +45,7 @@
                         ABC de motor
                     </label>
                 </div>
-                <!-- Añadir más servicios según sea necesario -->
+            
             </div>
         </div>
 

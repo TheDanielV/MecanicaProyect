@@ -22,6 +22,10 @@ urlpatterns = [
     path("ordenarServicio/", views.ordenar_servicio, name="ordenarServicio"),
     path("ordenes/", views.listar_ordenes, name="listar_ordenes"),
     path('orden/<int:id>/', views.detalle_orden, name='detalle_orden'),
-
+    path('payment/', views.payment, name='payment'),
+    path('transferencia/', views.transferencia, name='transferencia'),
+    path('retirarAuto/', views.retirarAuto, name='retirarAuto'),
+    path('success/', views.success, name='success'),
+    path('subirQR/', views.subirQR, name='subirQR'),
 
 ]
