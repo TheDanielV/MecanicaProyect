@@ -4,8 +4,10 @@ from django.contrib import messages
 from django.contrib.auth import logout
 from django.shortcuts import render, redirect, get_object_or_404
 from .forms import *
+=========
 from django.shortcuts import render, redirect
 from .forms import registerForm, loginForm, crearServicioForm
+>>>>>>>>> Temporary merge branch 2
 from services.AuthService.models import *
 from .utils import *
 from .models import *
@@ -61,13 +63,11 @@ def register(request):
                 customer.create(form.cleaned_data.get('name'), form.cleaned_data.get('last_name'),
                                 form.cleaned_data.get('ci'), form.cleaned_data.get('cellphone'),
                                 form.cleaned_data.get('direction'), token)
-                # 4 Transaction
-
-                with transaction.atomic(using=AUTH_DATABASE):
-                    user.save()
-                    with transaction.atomic(using='default'):
-                        customer.save()
-
+                user.save(using=AUTH_DATABASE)
+                customer.save(using='default')
+                return render(request, 'index.html', {
+                    'title': "Usuario Creado"
+                })
             except IntegrityError as e:
                 # voy a reenviar el mismo formulario con los datos mismos datos, excepto contraseña
                 return render(request, 'AuthViews/register.html', {'form': form, 'error': e})
@@ -387,6 +387,7 @@ def subirQR(request):
     return render(request, 'MainApp/subirQR.html')
 
 
+
 @role_login_required(allowed_roles=['admin'])
 def mostrar_servicios(request):
     services = [
@@ -433,12 +434,14 @@ def editarServicios(request, service_id):
             servicio["nombre"] = form.cleaned_data['nombreServicio']
             servicio["descripcion"] = form.cleaned_data['descripcionServicio']
             servicio["precio"] = form.cleaned_data['precioServicio']
+            servicio["estacion"] = form.cleaned_data['estacionServicio']
             return redirect('mostrarServicios')  # Redirige a la lista de servicios (deberás definir esta vista)
     else:
         form = crearServicioForm(initial={
             'nombreServicio': servicio['nombre'],
             'descripcionServicio': servicio['descripcion'],
             'precioServicio': servicio['precio'],
+            'estacionServicio': servicio['estacion'],
         })
 
     return render(request, 'MainApp/editar_servicio.html', {'form': form, 'service_id': service_id})

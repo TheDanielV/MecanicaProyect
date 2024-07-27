@@ -8,10 +8,11 @@ urlpatterns = [
     path("", views.index, name="index"),
     path("redirect/", views.default_view, name="default_view"),
     path("register/", views.register, name="register"),
-    path("qr/", views.qr_page, name="qr"),
+
     path('generate_qr/', views.qr_code_view, name='generate_qr'),
     path('login/', views.login, name='login'),
     path("mostrarAutos/", views.mostrar_autos, name="mostrarAutos"),
+<<<<<<<<< Temporary merge branch 1
     path("registrarAuto/", views.registrar_auto, name="registrarAuto"),
     path("mostrarEstacion/", views.mostrar_estacion, name="mostrarEstacion"),
     path("enviarCorreo/",views.token_sended_test, name="enviarCorreo"),
