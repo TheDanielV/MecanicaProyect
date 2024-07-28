@@ -27,10 +27,30 @@
           <div class="card-body">
             <form method="post">
               {% csrf_token %}
+              
+              <!-- Errores Generales -->
+              {% if form.non_field_errors %}
+                <div class="alert alert-danger">
+                  {% for error in form.non_field_errors %}
+                    <p>{{ error }}</p>
+                  {% endfor %}
+                </div>
+              {% endif %}
+              
+              <!-- Campo Usuario -->
               <div class="form-group">
                 {{ form.user.label_tag }}
                 {{ form.user }}
+                {% if form.user.errors %}
+                  <div class="invalid-feedback d-block">
+                    {% for error in form.user.errors %}
+                      <p>{{ error }}</p>
+                    {% endfor %}
+                  </div>
+                {% endif %}
               </div>
+
+              <!-- Campo Contraseña -->
               <div class="form-group">
                 {{ form.password.label_tag }}
                 <div class="input-group">
@@ -41,31 +61,94 @@
                     </button>
                   </div>
                 </div>
+                {% if form.password.errors %}
+                  <div class="invalid-feedback d-block">
+                    {% for error in form.password.errors %}
+                      <p>{{ error }}</p>
+                    {% endfor %}
+                  </div>
+                {% endif %}
               </div>
+
+              <!-- Campo Nombre -->
               <div class="form-group">
                 {{ form.name.label_tag }}
                 {{ form.name }}
+                {% if form.name.errors %}
+                  <div class="invalid-feedback d-block">
+                    {% for error in form.name.errors %}
+                      <p>{{ error }}</p>
+                    {% endfor %}
+                  </div>
+                {% endif %}
               </div>
+
+              <!-- Campo Apellido -->
               <div class="form-group">
                 {{ form.last_name.label_tag }}
                 {{ form.last_name }}
+                {% if form.last_name.errors %}
+                  <div class="invalid-feedback d-block">
+                    {% for error in form.last_name.errors %}
+                      <p>{{ error }}</p>
+                    {% endfor %}
+                  </div>
+                {% endif %}
               </div>
+
+              <!-- Campo Teléfono -->
               <div class="form-group">
                 {{ form.cellphone.label_tag }}
                 {{ form.cellphone }}
+                {% if form.cellphone.errors %}
+                  <div class="invalid-feedback d-block">
+                    {% for error in form.cellphone.errors %}
+                      <p>{{ error }}</p>
+                    {% endfor %}
+                  </div>
+                {% endif %}
               </div>
+
+              <!-- Campo Cédula -->
               <div class="form-group">
                 {{ form.ci.label_tag }}
                 {{ form.ci }}
+                {% if form.ci.errors %}
+                  <div class="invalid-feedback d-block">
+                    {% for error in form.ci.errors %}
+                      <p>{{ error }}</p>
+                    {% endfor %}
+                  </div>
+                {% endif %}
               </div>
+
+              <!-- Campo Dirección -->
               <div class="form-group">
                 {{ form.direction.label_tag }}
                 {{ form.direction }}
+                {% if form.direction.errors %}
+                  <div class="invalid-feedback d-block">
+                    {% for error in form.direction.errors %}
+                      <p>{{ error }}</p>
+                    {% endfor %}
+                  </div>
+                {% endif %}
               </div>
+
+              <!-- Campo Correo -->
               <div class="form-group">
                 {{ form.email.label_tag }}
                 {{ form.email }}
+                {% if form.email.errors %}
+                  <div class="invalid-feedback d-block">
+                    {% for error in form.email.errors %}
+                      <p>{{ error }}</p>
+                    {% endfor %}
+                  </div>
+                {% endif %}
               </div>
+
+              <!-- Botones de Acción -->
               <div class="row justify-content-center">
                 <div class="col-md-auto mb-3">
                   <button type="submit" class="btn btn-primary" style="background-color:#A62D43; border-color:#A62D43;">
@@ -73,13 +156,12 @@
                   </button>
                 </div>
                 <div class="col-md-auto mb-3">
-                  <button type="button" class="btn btn-primary" onclick="window.location.href = '{% url 'login' %}'" style="background-color:#2C2F40; border-color:#2C2F40; color: white;">
+                  <button type="button" class="btn btn-secondary" onclick="window.location.href = '{% url 'login' %}'">
                     Cancelar
                   </button>
                 </div>
               </div>
             </form>
-            <div>{{ error }}</div>
           </div>
         </div>
       </div>

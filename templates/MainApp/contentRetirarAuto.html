@@ -42,42 +42,53 @@
     
 </style>
 <div class="container1" style="max-width: 600px; margin: auto;">
-
     <div class="card mb-4" style="margin-top: 20px">
         <div class="card-body">
             <h3 class="card-title text-center">Retiro del auto</h3>
-            <p class ="text-center">Ingrese la información de la persona autorizada para retirar el vehículo</p>
+            <p class="text-center">Ingrese la información de la persona autorizada para retirar el vehículo</p>
             <form method="post" enctype="multipart/form-data" style="margin: 15px">
                 {% csrf_token %}
                 <div class="form-group">
                     {{ form.name.label_tag }}
                     {{ form.name }}
+                    {% if form.name.errors %}
+                        <div class="invalid-feedback d-block">
+                            {{ form.name.errors }}
+                        </div>
+                    {% endif %}
                 </div>
                 <div class="form-group">
                     {{ form.last_name.label_tag }}
                     {{ form.last_name }}
+                    {% if form.last_name.errors %}
+                        <div class="invalid-feedback d-block">
+                            {{ form.last_name.errors }}
+                        </div>
+                    {% endif %}
                 </div>
                 <div class="form-group">
                     {{ form.cellphone.label_tag }}
                     {{ form.cellphone }}
+                    {% if form.cellphone.errors %}
+                        <div class="invalid-feedback d-block">
+                            {{ form.cellphone.errors }}
+                        </div>
+                    {% endif %}
                 </div>
                 <div class="form-group">
                     {{ form.ci.label_tag }}
                     {{ form.ci }}
+                    {% if form.ci.errors %}
+                        <div class="invalid-feedback d-block">
+                            {{ form.ci.errors }}
+                        </div>
+                    {% endif %}
                 </div>
                 <div class="form-group">
-                    {{ form.direction.label_tag }}
-                    {{ form.direction }}
-                </div>
-                <div class="form-group">
-                    {{ form.email.label_tag }}
-                    {{ form.email }}
-                </div>
-                <div class="mb-3">
                     {{ form.file.label_tag }}
                     {{ form.file }}
                 </div>
-                 <div class="button-group">
+                <div class="button-group">
                     <button type="submit" class="btn-submit" id="enviarButton">
                         Enviar
                     </button>
@@ -89,4 +100,7 @@
         </div>
     </div>
 </div>
+
+
+
 {% endblock %}
