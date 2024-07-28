@@ -355,9 +355,10 @@ def transferencia(request, id):
         form = TransferenciaImgForm(request.POST, request.FILES)
         print(form.is_valid())
         if form.is_valid():
+            orden = Order.get_order_by_id_and_customer(id=id,
+                                                       customer=Customer.get_customer(request.session['token']))
             try:
-                orden = Order.get_order_by_id_and_customer(id=id,
-                                                           customer=Customer.get_customer(request.session['token']))
+
                 payment = Payment()
                 payment.order = orden
                 payment.tipo = Payment.TIPO_TRANSFERENCIA
@@ -376,7 +377,7 @@ def transferencia(request, id):
             except InvalidPassword as e:
                 return redirect('default_view')
 
-            return redirect('success')
+            return redirect('success', {'id': orden.id})
 
     else:
         form = TransferenciaImgForm()
@@ -385,17 +386,21 @@ def transferencia(request, id):
 
 
 @role_login_required(allowed_roles=['customer'])
-def retirarAuto(request):
+def retirarAuto(request, id):
     if request.method == 'POST':
         form = retirarAutoForm(request.POST, request.FILES)
+        print(form.is_valid())
         if form.is_valid():
-            # Procesa los datos del formulario aquí, por ejemplo, guardándolos en la base de datos
-            # name = form.cleaned_data['name']
-            # last_name = form.cleaned_data['last_name']
-            # cellphone = form.cleaned_data['cellphone']
-            # ci = form.cleaned_data['ci']
-            # file = form.cleaned_data['file']
-            # Redirige a una página de éxito
+            name = form.cleaned_data.get('name')
+            last_name = form.cleaned_data.get('last_name')
+            ci = form.cleaned_data.get('ci')
+            guest = Guest()
+            if 'file' in request.FILES:
+                image_file = request.FILES['file']
+                file = image_file.read()
+                guest.create_guest(ci, name, last_name, file)
+
+            guest.save()
             return redirect('success')
     else:
         form = retirarAutoForm()
@@ -552,8 +557,9 @@ def detalle_orden_cliente(request, id):
 
 
 def upload_payment(request, id):
+    orden = Order.get_order_by_id_and_customer(id=id, customer=Customer.get_customer(request.session['token']))
     try:
-        orden = Order.get_order_by_id_and_customer(id=id, customer=Customer.get_customer(request.session['token']))
+
         payment = Payment()
         payment.order = orden
         payment.tipo = Payment.TIPO_VENTANILLA
@@ -571,7 +577,7 @@ def upload_payment(request, id):
     except InvalidPassword as e:
         return redirect('default_view')
 
-    return render(request, 'MainApp/success.html')
+    return render(request, 'MainApp/success.html', {'id': orden.id})
 
 
 @role_login_required(allowed_roles=['admin'])

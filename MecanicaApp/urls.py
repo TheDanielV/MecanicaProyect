@@ -38,7 +38,7 @@ urlpatterns = [
     # Lo de mis amiguitos
     path('payment/<int:id>/', views.payment, name='payment'),
     path('transferencia/<int:id>/', views.transferencia, name='transferencia'),
-    path('retirarAuto/', views.retirarAuto, name='retirarAuto'),
+    path('retirarAuto/<int:id>/', views.retirarAuto, name='retirarAuto'),
     path('success/', views.success, name='success'),
     path('subirQR/', views.subirQR, name='subirQR'),
     path('actualizar/', views.update_state, name='actualizar_estado'),

@@ -150,11 +150,9 @@ class retirarAutoForm(forms.Form):
         attrs={'class': 'input form-control', 'placeholder': 'Ingrese su nombre'}))
     last_name = forms.CharField(label="Apellido", max_length=200, widget=forms.TextInput(
         attrs={'class': 'input form-control', 'placeholder': 'Ingrese su apellido'}))
-    cellphone = forms.CharField(label="Teléfono", max_length=200, widget=forms.NumberInput(
-        attrs={'class': 'input form-control', 'placeholder': 'Ingrese su teléfono'}))
     ci = forms.CharField(label="Cédula", max_length=200, widget=forms.NumberInput(
         attrs={'class': 'input form-control', 'placeholder': 'Ingrese su cédula'}))
-    file = forms.FileField(label='Subir cédula en imagen o pdf', widget=forms.ClearableFileInput(
+    file = forms.ImageField(label='Selecciona un archivo', widget=forms.ClearableFileInput(
         attrs={'class': 'form-control', 'id': 'formFile', 'accept': 'image/*,.pdf'}))
 
 

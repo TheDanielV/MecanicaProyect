@@ -48,18 +48,17 @@ class Customer(Person):
 
 
 class Guest(models.Model):
-    ci = models.CharField(max_length=20, primary_key=True, default="0000000000")
+    ci = models.CharField(max_length=225, primary_key=True, default="0000000000")
     name = models.CharField(max_length=30, default="None")
     last_name = models.CharField(max_length=30, null=False, default="None")
-    validation_token = models.CharField(max_length=50, default=None)
     file = models.FileField(upload_to='files/')
-    image = models.ImageField(upload_to='images/', null=True, blank=True)
+    image = models.BinaryField(blank=True, null=True)
 
-    def create_guest(self, ci, name, last_name, validation_token):
+    def create_guest(self, ci, name, last_name, file):
         self.ci = ci
         self.name = name
         self.last_name = last_name
-        self.validation_token = validation_token
+        self.file = file
         self.save()
 
 
