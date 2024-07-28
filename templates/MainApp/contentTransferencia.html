@@ -53,7 +53,7 @@
     <div class="card mb-4">
         <div class="card-body">
             <h3 class="card-title">Subir archivo</h3>
-            <form method="post" enctype="multipart/form-data">
+            <form method="post" enctype="multipart/form-data" action="{% url 'transferencia' order.id%}">
                 {% csrf_token %}
                 <div class="mb-3">
                     {{ form.file }}

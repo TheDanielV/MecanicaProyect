@@ -140,8 +140,8 @@ class PaymentForm(forms.Form):
     )
 
 
-class TransferenciaForm(forms.Form):
-    file = forms.FileField(label='Selecciona un archivo', widget=forms.ClearableFileInput(
+class TransferenciaImgForm(forms.Form):
+    file = forms.ImageField(label='Selecciona un archivo', widget=forms.ClearableFileInput(
         attrs={'class': 'form-control', 'id': 'formFile', 'accept': 'image/*,.pdf'}))
 
 

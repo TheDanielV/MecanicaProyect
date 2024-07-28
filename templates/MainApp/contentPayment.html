@@ -103,15 +103,15 @@
             <table class="info-table">
                 <tr>
                     <th>Marca</th>
-                    <td>Toyota</td>
+                    <td>{{ order.vehicle.marca }}</td>
                 </tr>
                 <tr>
                     <th>Modelo</th>
-                    <td>Corolla</td>
+                    <td>{{ order.vehicle.model }}</td>
                 </tr>
                 <tr>
                     <th>Año</th>
-                    <td>2020</td>
+                    <td>{{ order.vehicle.anio }}</td>
                 </tr>
             </table>
         </div>
@@ -126,27 +126,17 @@
                     </tr>
                 </thead>
                 <tbody>
-                    <tr>
-                        <td>Cambio de aceite</td>
-                        <td>$30</td>
+                    {% for service in services %}
+                        <tr>
+                        <td>{{ service.name }}</td>
+                        <td>{{ service.price}}</td>
                     </tr>
-                    <tr>
-                        <td>Revisión de frenos</td>
-                        <td>$50</td>
-                    </tr>
-                    <tr>
-                        <td>Lavado</td>
-                        <td>$20</td>
-                    </tr>
-                    <tr>
-                        <th>Total</th>
-                        <th>$100</th>
-                    </tr>
+                    {% endfor %}
                 </tbody>
             </table>
         </div>
         
-        <form method="post" id="paymentForm">
+        <form method="post" id="paymentForm" action="{% url 'uploadPayment' order.id %}">
             {% csrf_token %}
             <div class="section">
                 <h5>Método de Pago</h5>
@@ -179,7 +169,7 @@
         radios.forEach(radio => {
             radio.addEventListener('change', function() {
                 if (this.value === 'transferencia') {
-                    window.location.href = '{% url "transferencia" %}';
+                    window.location.href = '{% url "transferencia" order.id%}';
                 }
             });
         });

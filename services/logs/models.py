@@ -17,9 +17,14 @@ class AuthLog(models.Model):
     event_type = models.CharField(max_length=100, choices=[(tag.name, tag.value) for tag in EventType],
                                   default=EventType.LOGIN_SUCCESS.name)
 
+    @classmethod
+    def create_log(cls, ip_address, event_type):
+        """
+        Método para crear un registro de autenticación.
+        """
+        log = AuthLog(ip_address=ip_address, event_type=event_type)
+        log.save()
+        return log
+
     class Meta:
         db_table = 'session_log'
-
-    def create_log(self, ip_address, event_type):
-        self.ip_address = ip_address
-        self.event_type = event_type

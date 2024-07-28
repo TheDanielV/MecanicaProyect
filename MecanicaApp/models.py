@@ -1,6 +1,7 @@
 from enum import Enum
 
 from django.db import models
+from .utils import *
 from typing import List
 
 
@@ -22,22 +23,28 @@ class Person(models.Model):
 
 
 class Customer(Person):
-    ci = models.CharField(max_length=20, primary_key=True, default="0000000000")
-    cellphone = models.CharField(max_length=20, default="0000000000")
+    ci = models.CharField(max_length=255, unique=True, default="0000000000")
+    cellphone = models.CharField(max_length=255, default="0000000000")
     direction = models.CharField(max_length=255, default="None")
 
     def create(self, name, last_name, ci, cellphone, direction, token):
         self.name = name
         self.token = token
         self.last_name = last_name
-        self.ci = ci
-        self.cellphone = cellphone
-        self.direction = direction
+        self.ci = encrypt_data(ci)
+        self.cellphone = encrypt_data(cellphone)
+        self.direction = encrypt_data(direction)
         self.role = Person.Role.CUSTOMER.value
 
     @staticmethod
     def get_customer(token):
-        return Customer.objects.get(token=token)
+        customer_enc = Customer.objects.get(token=token)
+        customer_dec = customer_enc
+        customer_dec.ci = decrypt_data(customer_enc.ci)
+        customer_dec.cellphone = decrypt_data(customer_enc.cellphone)
+        customer_dec.direction = decrypt_data(customer_enc.direction)
+
+        return customer_dec
 
 
 class Guest(models.Model):
@@ -60,7 +67,7 @@ class Vehicle(models.Model):
     customer = models.ForeignKey(Customer, on_delete=models.CASCADE, related_name='vehicles', default="0000000000")
     marca = models.CharField(max_length=255, default=None)
     model = models.CharField(max_length=255, default=None)
-    placa = models.CharField(max_length=30, default=None)
+    placa = models.CharField(max_length=255, default=None)
     anio = models.CharField(max_length=30, default=None)
     color = models.CharField(max_length=30, default=None)
 
@@ -68,21 +75,32 @@ class Vehicle(models.Model):
         self.customer = customer
         self.marca = marca
         self.model = model
-        self.placa = placa
+        self.placa = encrypt_data(placa)
         self.anio = anio
         self.color = color
 
     @staticmethod
     def get_vehicle_by_placa(placa):
-        return Vehicle.objects.get(placa=placa)
+        vehivle_ced = Vehicle.objects.get(pk=placa)
+        vehivle_ced.placa = decrypt_data(vehivle_ced.placa)
+        return vehivle_ced
 
     class Meta:
         db_table = 'mecanicaapp_vehicle'
 
     @staticmethod
     def delete_vehicle(placa):
-        Vehicle.objects.get(placa=placa).delete()
+        Vehicle.objects.get(placa=encrypt_data(placa)).delete()
 
+    @classmethod
+    def get_vehicle_by_customer(cls, token):
+        vehicles = Vehicle.objects.filter(customer__token=token)
+        for vehicle in vehicles:
+            vehicle.placa = decrypt_data(vehicle.placa)
+            print(vehicle.placa)
+
+
+        return vehicles
 
 class Admin(Person):
     def create_admin(self, name, last_name, token):
@@ -209,6 +227,9 @@ class Service(models.Model):
 
 
 class Order(models.Model):
+    PAGADO = 'pagado'
+    ESTADO_FINALIZADO = 'finalizado'
+
     customer = models.ForeignKey(Customer, on_delete=models.CASCADE, related_name='ordenes')
     vehicle = models.ForeignKey(Vehicle, on_delete=models.CASCADE, related_name='ordenes')
     service = models.ManyToManyField(Service)
@@ -230,22 +251,27 @@ class Order(models.Model):
 
     @classmethod
     def get_orders(cls):
-        return cls.objects.all()
+        orders = cls.objects.all()
+        for order in orders:
+            order.vehicle.placa=decrypt_data(order.vehicle.placa)
+        return orders
 
     def __str__(self):
         return f'Orden de {self.customer.name} para {self.vehicle.placa}'
 
     @classmethod
     def get_order_by_id(cls, order_id):
-        return cls.objects.get(id=order_id)
+        dec_order = cls.objects.get(id=order_id)
+        dec_order.vehicle.placa = decrypt_data(dec_order.vehicle.placa)
+        return dec_order
 
     @classmethod
     def get_station_dto(cls, station_id):
         servicios_en_estacion = []
         dto_list = []
-        placa = ""
-        orders = cls.objects.all()
+        orders = cls.objects.exclude(state=cls.ESTADO_FINALIZADO)
         for order in orders:
+            order.vehicle.placa = decrypt_data(order.vehicle.placa)
             for service in order.service.all():
                 if service.station.id == station_id and order.state == Station.get_station_by_id(
                         station_id).station_name:
@@ -260,27 +286,82 @@ class Order(models.Model):
         dto = StationDTO(order_id, order.vehicle.placa, order.service)
         return dto
 
+    @classmethod
+    def update_state(cls, station_id, station_name):
+        order = cls.objects.get(id=station_id)
+
+        servicios = order.service.all()
+        current_station = order.state
+
+        # Encontrar el siguiente servicio con una estación diferente
+        next_service = None
+        for service in servicios:
+            if service.station.station_name != current_station:
+                next_service = service
+                break
+
+        if next_service:
+            print('se actualiza')
+            order.state = next_service.station.station_name
+        else:
+            print('se finaliza')
+            order.state = "finalizado"
+
+        order.save()
+
+    @classmethod
+    def get_orders_by_client(cls, customer):
+        """
+        Obtiene todas las órdenes asociadas a un cliente específico.
+
+        Args:
+            customer (Customer): El cliente cuyas órdenes se desean obtener.
+
+        Returns:
+            QuerySet: Un QuerySet con las órdenes del cliente.
+        """
+        orders = cls.objects.filter(customer=customer)
+        decrypt_orders = []
+        for order in orders.all():
+            order.vehicle.placa = decrypt_data(order.vehicle.placa)
+            decrypt_orders.append(order)
+        return decrypt_orders
+
+    @classmethod
+    def get_order_by_id_and_customer(cls, id, customer):
+        dec_order = cls.objects.get(customer=customer, id=id)
+        dec_order.vehicle.placa = decrypt_data(dec_order.vehicle.placa)
+        return dec_order
+
 
 class Payment(models.Model):
-    class State(Enum):
-        IN_PROGRESS = 'in progress'
-        ACCEPTED = 'accepted'
-        REJECTED = 'rejected'
+    TIPO_TRANSFERENCIA = 'transferencia'
+    TIPO_VENTANILLA = 'ventanilla'
+    TIPO_PAGO_CHOICES = [
+        (TIPO_TRANSFERENCIA, 'Transferencia'),
+        (TIPO_VENTANILLA, 'Pago en ventanilla'),
+    ]
 
-    state = models.CharField(max_length=100, choices=[(tag.name, tag.value) for tag in State],
-                             default=State.IN_PROGRESS.value)
+    ESTADO_EN_PROCESO = 'en proceso'
+    ESTADO_EN_ESPERA = 'en espera'
+    ESTADO_PAGADO = 'pagado'
+    ESTADO_PAGO_CHOICES = [
+        (ESTADO_EN_PROCESO, 'En proceso'),
+        (ESTADO_EN_ESPERA, 'En espera'),
+        (ESTADO_EN_ESPERA, 'Pagado'),
+    ]
 
-    class Meta:
-        abstract = True
+    order = models.ForeignKey(Order, on_delete=models.CASCADE, related_name='pagos', primary_key=True)
+    tipo = models.CharField(max_length=20, choices=TIPO_PAGO_CHOICES)
+    estado = models.CharField(max_length=20, choices=ESTADO_PAGO_CHOICES, default=ESTADO_EN_ESPERA)
+    imagen_transferencia = models.BinaryField(blank=True, null=True)
 
-
-class Cash(Payment):
-    evidence = models.CharField(max_length=30, null=False, default="None")
-
-
-class BankCard(Payment):
-    tokenized_pin = models.CharField(max_length=30, null=False, default="None")
-    reference = models.CharField(max_length=30, null=False, default="None")
+    def save(self, *args, **kwargs):
+        if self.tipo == self.TIPO_TRANSFERENCIA:
+            self.estado = self.ESTADO_EN_PROCESO
+        else:
+            self.estado = self.ESTADO_PAGADO
+        super().save(*args, **kwargs)
 
 
 class StationDTO:

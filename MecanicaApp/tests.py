@@ -1,6 +1,7 @@
 import faker
 from django.test import TestCase
 from .models import *
+from .utils import *
 from services.AuthService.models import *
 from faker import Faker
 
@@ -21,4 +22,10 @@ class OrderTestCase(TestCase):
         order = Order()
         order.create(customer, vehicle)
         self.assertEqual(customer.name, order.customer.name, "data created for an order")
+        pass
+
+    def test_crypt(self):
+        cd = encrypt_data("1726004615")
+        print(cd)
+        print(decrypt_data(cd))
         pass

@@ -1,4 +1,4 @@
-{% extends 'base/baseAdministrador.html' %}
+{% extends 'base/autos.html' %}
 
 {% block content %}
 <style>
@@ -71,7 +71,7 @@
                 <td>{{ orden.total }}</td>
                 <td>{{ orden.state }}</td>
                 <td>
-                  <a href="{% url 'detalle_orden' orden.id %}" class="btn btn-primary">Ver Detalles</a>
+                  <a href="{% url 'detalle_orden_customer' orden.id %}" class="btn btn-primary">Ver Detalles</a>
                 </td>
               </tr>
               {% endfor %}
