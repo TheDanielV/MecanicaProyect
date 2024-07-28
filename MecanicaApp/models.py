@@ -1,6 +1,7 @@
 from enum import Enum
 
 from django.db import models
+from typing import List
 
 
 # Create your models here.
@@ -26,7 +27,6 @@ class Customer(Person):
     direction = models.CharField(max_length=255, default="None")
 
     def create(self, name, last_name, ci, cellphone, direction, token):
-
         self.name = name
         self.token = token
         self.last_name = last_name
@@ -127,6 +127,13 @@ class Station(models.Model):
     def get_stations(cls):
         return cls.objects.all()
 
+    @classmethod
+    def get_station_by_id(cls, station_id):
+        return cls.objects.get(pk=station_id)
+
+    def __str__(self):
+        return self.station_name
+
 
 class Employee(Person):
     station = models.ForeignKey(Station, on_delete=models.CASCADE, related_name='employees')
@@ -138,13 +145,18 @@ class Employee(Person):
         self.token = token
         self.station = station
 
+    @classmethod
+    def get_employee(cls, token):
+        return cls.objects.get(token=token)
+
 
 class Service(models.Model):
     station = models.ForeignKey(Station, on_delete=models.CASCADE, related_name='services')
     name = models.CharField(max_length=255, unique=True)
     description = models.TextField()
+    price = models.DecimalField(max_digits=10, decimal_places=2, default=0)
 
-    def create_service(self, station, name, description):
+    def create_service(self, station, name, description, price):
         """
         Crea un nuevo servicio asociado a una estación.
 
@@ -154,6 +166,7 @@ class Service(models.Model):
             station (Station): La estación con la que se asocia el servicio.
             name (str): El nombre del servicio.
             description (str): Una breve descripción del servicio.
+            price(double): Precio del servicio
 
         Returns:
             Service: La instancia del servicio creado.
@@ -161,21 +174,22 @@ class Service(models.Model):
         self.station = station
         self.name = name
         self.description = description
+        self.price = price
         self.save()
         return self
 
     @classmethod
-    def get_service_by_name(cls, service_name):
+    def get_service_by_name(cls, service_id):
         """
         Obtiene un servicio por su Nombre.
 
         Args:
-            service_name (str): El Nombre del servicio.
+            service_id (str): El ID del servicio.
 
         Returns:
             Service: La instancia del servicio encontrado.
         """
-        return cls.objects.get(name=service_name)
+        return cls.objects.get(pk=service_id)
 
     @classmethod
     def get_services(cls):
@@ -188,23 +202,31 @@ class Service(models.Model):
     def get_service_list_by_names(cls, services_raw):
         return cls.objects.filter(name__in=services_raw)
 
+    @classmethod
+    def delete_service(cls, id):
+        servicio = cls.objects.get(pk=id)
+        servicio.delete()
+
 
 class Order(models.Model):
     customer = models.ForeignKey(Customer, on_delete=models.CASCADE, related_name='ordenes')
     vehicle = models.ForeignKey(Vehicle, on_delete=models.CASCADE, related_name='ordenes')
     service = models.ManyToManyField(Service)
+    state = models.CharField(max_length=255, default=None)
+    total = models.DecimalField(max_digits=10, decimal_places=2, default=0)
 
     #  payment = models.CharField(max_length=2, choices=METODO_PAGO_CHOICES)
 
     def generate_order(self, customer, vehicle, services):
-
         self.customer = customer
         self.vehicle = vehicle
+        self.state = services[0].station.station_name
         self.save()
         self.service.set(services)
+        self.total = 0
+        for service in services:
+            self.total = self.total + service.price
         self.save()
-
-
 
     @classmethod
     def get_orders(cls):
@@ -216,6 +238,27 @@ class Order(models.Model):
     @classmethod
     def get_order_by_id(cls, order_id):
         return cls.objects.get(id=order_id)
+
+    @classmethod
+    def get_station_dto(cls, station_id):
+        servicios_en_estacion = []
+        dto_list = []
+        placa = ""
+        orders = cls.objects.all()
+        for order in orders:
+            for service in order.service.all():
+                if service.station.id == station_id and order.state == Station.get_station_by_id(
+                        station_id).station_name:
+                    servicios_en_estacion.append(service)
+                    placa = order.vehicle.placa
+                    dto_list.append(StationDTO(order.id, placa, service))
+        return dto_list
+
+    @classmethod
+    def get_station_dto_by_order_id(cls, order_id):
+        order = cls.get_order_by_id(order_id)
+        dto = StationDTO(order_id, order.vehicle.placa, order.service)
+        return dto
 
 
 class Payment(models.Model):
@@ -238,3 +281,10 @@ class Cash(Payment):
 class BankCard(Payment):
     tokenized_pin = models.CharField(max_length=30, null=False, default="None")
     reference = models.CharField(max_length=30, null=False, default="None")
+
+
+class StationDTO:
+    def __init__(self, order_id, placa, service):
+        self.order_id = order_id
+        self.placa = placa
+        self.service = service

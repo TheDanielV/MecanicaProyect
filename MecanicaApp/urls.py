@@ -7,10 +7,12 @@ from . import views
 urlpatterns = [
     path("", views.index, name="index"),
     path("redirect/", views.default_view, name="default_view"),
+    # Autorizacion
     path("register/", views.register, name="register"),
-
-    path('generate_qr/', views.qr_code_view, name='generate_qr'),
+    path('generate_qr/<str:order_id>/', views.qr_code_view, name='generate_qr'),
     path('login/', views.login, name='login'),
+    path('logout/', views.logout_user, name='logout'),
+    # Cliente
     path("mostrarAutos/", views.mostrar_autos, name="mostrarAutos"),
     path("registrarAuto/", views.registrar_auto, name="registrarAuto"),
     path("mostrarEstacion/", views.mostrar_estacion, name="mostrarEstacion"),
@@ -19,11 +21,12 @@ urlpatterns = [
     path("confirmarContrasenia/", views.password_confirmation, name="confirmarContrasenia"),
     path("registrarAuto/",views.registrar_auto,name="registrarAuto"),
     path('eliminarAuto/<int:auto_id>/', views.eliminar_auto, name='eliminarAuto'),
-    path('logout/', views.logout_user, name='logout'),
+    # Ordenes
     path("ordenarServicio/<str:id>/", views.ordenar_servicio, name="ordenarServicio"),
     path("generarOrden/", views.generate_order, name="generarOrden"),
     path("ordenes/", views.listar_ordenes, name="listar_ordenes"),
     path('orden/<int:id>/', views.detalle_orden, name='detalle_orden'),
+
 
     # para registrar un empleado
     path('registrarEmpleado/', views.agregar_empleado, name='registrarEmpleado'),
@@ -38,11 +41,11 @@ urlpatterns = [
     path('subirQR/', views.subirQR, name='subirQR'),
     path("registrarAuto/", views.registrar_auto,name="registrarAuto"),
 
+    # Servicios
     path("mostrarServicios/", views.mostrar_servicios, name='mostrarServicios'),
-
     path("crearServicio/", views.crearServicios, name="crearServicio"),
-
-    path("editar_servicio/<str:service_name>/", views.editarServicios, name='editar_servicio'),
+    path('deleteService/<int:id>/', views.delete_service, name='deleteService'),
+    path("editar_servicio/<int:id>/", views.editarServicios, name='editar_servicio'),
 
 
     # path('admin/customers/', views.admin_customer_list, name='admin_customer_list'),

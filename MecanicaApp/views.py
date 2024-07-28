@@ -116,8 +116,21 @@ def qr_code_view(request):
     person = None
     if request.session.get('role') == 'customer':
         person = Customer.get_customer(request.session.get('token'))
-
     img = generate_qr_code(encrypt_serializer_object(serialize_object(person)))
+    return HttpResponse(img.getvalue(), content_type="image/png")
+
+
+@role_login_required(allowed_roles=['employee'])
+def qr_code_view(request, order_id):
+    employee = Employee.get_employee(request.session.get('token'))
+    data = {
+        "id": order_id,
+        "station_name": employee.station.station_name
+    }
+
+    # Convertir a JSON
+    json_data = json.dumps(data)
+    img = generate_qr_code(json_data)
     return HttpResponse(img.getvalue(), content_type="image/png")
 
 
@@ -163,17 +176,9 @@ def registrar_auto(request):
 @role_login_required(allowed_roles=['employee'])
 def mostrar_estacion(request):
     # Datos de ejemplo, estos datos deben provenir de tu base de datos
-    vehiculos = [
-        {
-            'placa': 'PDB-1856',
-            'especificaciones': 'Aceite sintético, 5W-30, 5 litros'
-        },
-        {
-            'placa': 'XYZ-1234',
-            'especificaciones': 'Aceite mineral, 10W-40, 4 litros'
-        }
-    ]
-    return render(request, 'MainApp/contentEstacion.html', {'vehiculos': vehiculos})
+    employee = Employee.get_employee(request.session['token'])
+    dtos = Order.get_station_dto(employee.station.id)
+    return render(request, 'MainApp/contentEstacion.html', {'dtos': dtos})
 
 
 def send_email_form(request):
@@ -401,9 +406,10 @@ def crearServicios(request):
     if request.method == 'POST':
         form = crearServicioForm(request.POST)
         if form.is_valid():
-            # Aquí asumimos que tienes un modelo para el servicio y un método save en el formulario
-            # Si no, deberías manejar el guardado del servicio aquí manualmente
-            form.save()
+            service = Service()
+            service.create_service(form.cleaned_data.get('estacionServicio'), form.cleaned_data.get('nombreServicio'),
+                                   form.cleaned_data.get('descripcionServicio'),
+                                   form.cleaned_data.get('precioServicio'))
             return redirect('mostrarServicios')
     else:
         form = crearServicioForm()
@@ -411,24 +417,23 @@ def crearServicios(request):
 
 
 @role_login_required(allowed_roles=['admin'])
-def editarServicios(request, service_name):
-    servicio = Service.get_service_by_name(service_name=service_name)
+def editarServicios(request, id):
+    servicio = Service.get_service_by_name(service_id=id)
+
     if request.method == 'POST':
         # Pasar la instancia del servicio al formulario
-        form = crearServicioForm(request.POST, instance=servicio)
+        form = crearServicioForm(request.POST)
         if form.is_valid():
             # Aquí puedes simular la actualización del servicio
             servicio.name = form.cleaned_data['nombreServicio']
             servicio.description = form.cleaned_data['descripcionServicio']
-            # TODO agregar precio
-            # servicio["precio"] = form.cleaned_data['precioServicio']
-            form.save()  # Guarda los cambios en el modelo
+            servicio.price = form.cleaned_data['precioServicio']
             return redirect('mostrarServicios')  # Redirige a la lista de servicios (deberás definir esta vista)
     else:
         # Inicializar el formulario con los datos actuales del servicio
-        form = crearServicioForm(instance=servicio)
+        form = crearServicioForm()
 
-    return render(request, 'MainApp/AdminViews/editar_servicio.html', {'form': form, 'service_id': service_name})
+    return render(request, 'MainApp/AdminViews/editar_servicio.html', {'form': form, 'service_id': id})
 
 
 @role_login_required(['admin'])
@@ -467,3 +472,14 @@ def agregar_empleado(request):
     else:
         estaciones = Station.get_stations()
         return render(request, 'MainApp/AdminViews/registratEmpleado.html', {'estaciones': estaciones})
+
+
+def delete_service(request, id):
+    print(id)
+    Service.delete_service(id)
+    return redirect('mostrarServicios')
+
+
+def change_state(request):
+
+    return redirect('mostrarServicios')
