@@ -91,9 +91,16 @@
             </tbody>
           </table>
           <div class="d-flex justify-content-end">
-            <button class="btn btn-primary">Regresar</button>
+            <button class="btn btn-primary" onclick="window.location.href = '{% url 'ordenes' %}'">Regresar</button>
           </div>
-            <img src="=" alt="">
+            {% if orden.state == 'pagado' or orden.state == 'en proceso' or orden.state == 'en espera' %}
+                    <h1 class="mx-auto text-center font-weight-bold" style="color: #A62D43;">
+      Evidencia de pago
+    </h1>
+                            <img src="{% url 'imgPayment' id %}" alt="">
+            {% else %}
+            {% endif %}
+
         </div>
     </div>
   </div>

@@ -50,8 +50,9 @@ urlpatterns = [
     path('deleteService/<int:id>/', views.delete_service, name='deleteService'),
     path("editar_servicio/<int:id>/", views.editarServicios, name='editar_servicio'),
 
-    #payments
+    # payments
     path('Payment/<int:id>/', views.upload_payment, name='uploadPayment'),
+    path('imgPayment/<int:id>/', views.img_payment, name='imgPayment'),
 
 
     # path('admin/customers/', views.admin_customer_list, name='admin_customer_list'),

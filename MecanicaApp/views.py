@@ -14,7 +14,7 @@ from services.logs.models import *
 from .utils import *
 from .models import *
 from django.db import IntegrityError, transaction
-from django.http import HttpResponse
+from django.http import HttpResponse, Http404
 from MecanicaApp.decorators import *
 from django.shortcuts import render, get_object_or_404, redirect
 
@@ -298,7 +298,8 @@ def detalle_orden(request, id):
     orden = Order.get_order_by_id(id)
     valor_total = orden.total
     return render(request, 'MainApp/AdminViews/contentDetalleOrden.html',
-                  {'orden': orden, 'servicios': orden.service.all(), 'valor_total': valor_total})
+                  {'orden': orden, 'servicios': orden.service.all(), 'valor_total': valor_total,
+                   'id': id})
 
 
 def upload_qr(request):
@@ -355,7 +356,8 @@ def transferencia(request, id):
         print(form.is_valid())
         if form.is_valid():
             try:
-                orden = Order.get_order_by_id_and_customer(id=id, customer=Customer.get_customer(request.session['token']))
+                orden = Order.get_order_by_id_and_customer(id=id,
+                                                           customer=Customer.get_customer(request.session['token']))
                 payment = Payment()
                 payment.order = orden
                 payment.tipo = Payment.TIPO_TRANSFERENCIA
@@ -570,3 +572,15 @@ def upload_payment(request, id):
         return redirect('default_view')
 
     return render(request, 'MainApp/success.html')
+
+
+@role_login_required(allowed_roles=['admin'])
+def img_payment(request, id):
+    try:
+        payment = Payment.objects.get(pk=id)
+        if payment.imagen_transferencia:
+            return HttpResponse(payment.imagen_transferencia, content_type="image/jpeg")
+        else:
+            return None
+    except Payment.DoesNotExist:
+        return None
