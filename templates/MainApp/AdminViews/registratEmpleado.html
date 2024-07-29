@@ -4,7 +4,7 @@
   <h1 class="text-center">Registrar Empleado</h1>
 
   <div class="container mt-4 d-flex justify-content-center">
-    <form method="post" action="" class="w-50">
+    <form id="registroForm" method="post" action="" class="w-50">
       {% csrf_token %}
       <div class="form-group mb-3">
         <label for="nombre">Nombre</label>
@@ -16,6 +16,7 @@
           placeholder="Ingrese el nombre"
           required
         />
+        <div class="invalid-feedback" id="nombreError"></div>
       </div>
 
       <div class="form-group mb-3">
@@ -28,6 +29,7 @@
           placeholder="Ingrese el apellido"
           required
         />
+        <div class="invalid-feedback" id="apellidoError"></div>
       </div>
 
       <div class="form-group mb-3">
@@ -43,6 +45,7 @@
             <option value="{{ estacion.station_name }}">{{ estacion.station_name }}</option>
           {% endfor %}
         </select>
+        <div class="invalid-feedback" id="estacionError"></div>
       </div>
 
       <div class="form-group mb-3">
@@ -55,6 +58,7 @@
           placeholder="Ingrese su correo electrónico"
           required
         />
+        <div class="invalid-feedback" id="emailError"></div>
       </div>
 
       <div class="text-center mt-4">
@@ -69,5 +73,64 @@
     </form>
   </div>
 </div>
+
+<script>
+document.getElementById('registroForm').addEventListener('submit', function(event) {
+    let valid = true;
+    const nombre = document.getElementById('nombre');
+    const apellido = document.getElementById('apellido');
+    const estacion = document.getElementById('estacion');
+    const email = document.getElementById('email');
+
+    // Validación del nombre (solo letras y espacios)
+    const nombreError = document.getElementById('nombreError');
+    if (!/^[a-zA-Z\s]+$/.test(nombre.value)) {
+        nombreError.textContent = 'El nombre solo puede contener letras y espacios.';
+        nombre.classList.add('is-invalid');
+        valid = false;
+    } else {
+        nombreError.textContent = '';
+        nombre.classList.remove('is-invalid');
+    }
+
+    // Validación del apellido (solo letras y espacios)
+    const apellidoError = document.getElementById('apellidoError');
+    if (!/^[a-zA-Z\s]+$/.test(apellido.value)) {
+        apellidoError.textContent = 'El apellido solo puede contener letras y espacios.';
+        apellido.classList.add('is-invalid');
+        valid = false;
+    } else {
+        apellidoError.textContent = '';
+        apellido.classList.remove('is-invalid');
+    }
+
+    // Validación de la estación
+    const estacionError = document.getElementById('estacionError');
+    if (estacion.value === '') {
+        estacionError.textContent = 'Debe seleccionar una estación.';
+        estacion.classList.add('is-invalid');
+        valid = false;
+    } else {
+        estacionError.textContent = '';
+        estacion.classList.remove('is-invalid');
+    }
+
+    // Validación del correo electrónico
+    const emailError = document.getElementById('emailError');
+    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email.value)) {
+        emailError.textContent = 'Ingrese un correo electrónico válido.';
+        email.classList.add('is-invalid');
+        valid = false;
+    } else {
+        emailError.textContent = '';
+        email.classList.remove('is-invalid');
+    }
+
+    // Si alguna validación falla, evita el envío del formulario
+    if (!valid) {
+        event.preventDefault();
+    }
+});
+</script>
 
 {% endblock %}

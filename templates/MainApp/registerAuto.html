@@ -5,11 +5,12 @@
     <h1 class="text-center">Registrar Vehículo</h1>
 
     <div class="container mt-4 d-flex justify-content-center">
-        <form method="post" action="{% url 'registrarAuto' %}" class="w-50" id="regiter">
+        <form method="post" action="{% url 'registrarAuto' %}" class="w-50" id="registerForm">
             {% csrf_token %}
             <div class="form-group mb-3">
                 <label for="año">Año</label>
                 <input type="text" class="form-control mt-2" id="año" name="año" placeholder="Ingrese el año" required>
+                <div id="yearError" class="invalid-feedback d-block"></div>
             </div>
 
             <div class="form-group mb-3">
@@ -24,13 +25,14 @@
 
             <div class="form-group mb-3">
                 <label for="placa">Placa</label>
-                <input type="text" class="form-control mt-2 " id="placa" name="placa" placeholder="Ingrese la placa" required>
-                        <p id="mensajeError" style="color: red;"></p>
+                <input type="text" class="form-control mt-2" id="placa" name="placa" placeholder="Ingrese la placa" required>
+                <div id="plateError" class="invalid-feedback d-block"></div>
             </div>
 
             <div class="form-group mb-3">
                 <label for="color">Color</label>
                 <input type="text" class="form-control mt-2" id="color" name="color" placeholder="Ingrese el color" required>
+                <div id="colorError" class="invalid-feedback d-block"></div>
             </div>
 
             <div class="text-center mt-4">
@@ -39,17 +41,53 @@
         </form>
     </div>
 
-</div>
-        <script>
-        document.getElementById('regiter').addEventListener('submit', function(event) {
-            const codigo = document.getElementById('placa').value;
-            const regex = /^[A-Z]{3}-\d{3,4}$/;
+    <script>
+        document.getElementById('registerForm').addEventListener('submit', function(event) {
+            let isValid = true;
 
-            if (!regex.test(codigo)) {
-                event.preventDefault();
-                document.getElementById('mensajeError').textContent = 'Placa Incorrecta, ingreselo de la forma XXX-123/XXX-1234';
+            // Obtener campos y mensajes de error
+            const yearInput = document.getElementById('año');
+            const yearError = document.getElementById('yearError');
+            const colorInput = document.getElementById('color');
+            const colorError = document.getElementById('colorError');
+            const plateInput = document.getElementById('placa');
+            const plateError = document.getElementById('plateError');
+
+            // Validación de Año
+            if (!/^\d{4}$/.test(yearInput.value)) {
+                isValid = false;
+                yearError.textContent = 'El año debe contener exactamente 4 dígitos.';
+                yearInput.classList.add('is-invalid');
             } else {
-                document.getElementById('mensajeError').textContent = '';
+                yearError.textContent = '';
+                yearInput.classList.remove('is-invalid');
+            }
+
+            // Validación de Color
+            if (!/^[a-zA-Z]+$/.test(colorInput.value)) {
+                isValid = false;
+                colorError.textContent = 'El color solo puede contener letras.';
+                colorInput.classList.add('is-invalid');
+            } else {
+                colorError.textContent = '';
+                colorInput.classList.remove('is-invalid');
+            }
+
+            // Validación de Placa
+            const plateValue = plateInput.value;
+            const plateRegex = /^[A-Z]{3}-\d{3,4}$/;
+            if (!plateRegex.test(plateValue)) {
+                isValid = false;
+                plateError.textContent = 'Placa Incorrecta, ingréselo de la forma XXX-123/XXX-1234';
+                plateInput.classList.add('is-invalid');
+            } else {
+                plateError.textContent = '';
+                plateInput.classList.remove('is-invalid');
+            }
+
+            // Si alguna validación falla, evitar el envío del formulario
+            if (!isValid) {
+                event.preventDefault();
             }
         });
     </script>
