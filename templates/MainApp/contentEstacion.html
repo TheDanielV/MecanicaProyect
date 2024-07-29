@@ -10,19 +10,20 @@
         </h1>
     </div>
 
-    {% for vehiculo in vehiculos %}
+    {% for dto in dtos %}
     <div class="card shadow mt-5 mx-auto" style="max-width: 800px;">
         <div class="row g-0">
             <div class="col-md-8">
                 <div class="card-body">
-                    <h5 class="card-title">Placa: {{ vehiculo.placa }}</h5>
+                    <h5 class="card-title">Placa: {{ dto.placa }}</h5>
                     <h5 class="card-text mt-4">Especificaciones:</h5>
-                    <p class="card-text">{{ vehiculo.especificaciones }}</p>
+                    <p class="card-text">{{ dto.service.name }}: {{ dto.service.description }}</p>
+
                 </div>
             </div>
             <div class="col-md-4">
                 <img
-                    src="https://upload.wikimedia.org/wikipedia/commons/d/d7/Commons_QR_code.png"
+                    src="{% url 'generate_qr' dto.order_id %}"
                     class="img-fluid rounded-end"
                     alt="QR Code"
                 />
@@ -31,5 +32,6 @@
     </div>
     {% endfor %}
 </div>
+
 
 {% endblock %}

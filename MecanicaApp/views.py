@@ -1,16 +1,20 @@
 import os
-
+import string
+import random
 from django.contrib import messages
 from django.contrib.auth import logout
 from django.shortcuts import render, redirect, get_object_or_404
+from docutils.nodes import description
+from pyzbar.pyzbar import decode
 from .forms import *
 from django.shortcuts import render, redirect
 from .forms import registerForm, loginForm, crearServicioForm
 from services.AuthService.models import *
+from services.logs.models import *
 from .utils import *
 from .models import *
 from django.db import IntegrityError, transaction
-from django.http import HttpResponse
+from django.http import HttpResponse, Http404
 from MecanicaApp.decorators import *
 from django.shortcuts import render, get_object_or_404, redirect
 
@@ -20,8 +24,7 @@ LOG_DATABASE = 'log_db'
 
 def index(request):
     title = "MecanicaApp"
-    client_ip = request.META.get('REMOTE_ADDR')
-    print(client_ip)
+
     if request.session.get('token') is not None:
         return redirect('default_view')
     else:
@@ -41,11 +44,16 @@ def default_view(request):
             try:
                 persona = Admin.objects.get(token=request.session.get('token'))
             except Admin.DoesNotExist:
-                pass
+                try:
+                    persona = Employee.objects.get(token=request.session.get('token'))
+                except Employee.DoesNotExist:
+                    pass
         if persona.role == 'admin':
             return redirect("listar_ordenes")
         elif persona.role == 'customer':
             return redirect("mostrarAutos")
+        elif persona.role == 'employee':
+            return redirect('mostrarEstacion')
 
 
 def register(request):
@@ -97,6 +105,8 @@ def login(request):
                 return redirect('default_view')
 
             else:
+                AuthLog.create_log(request.META.get('REMOTE_ADDR'), AuthLog.EventType.LOGIN_FAILURE.value)
+
                 return render(request, 'AuthViews/login.html', {'form': form, 'error': 'Invalid credentials'})
     else:
         form = loginForm()
@@ -108,8 +118,21 @@ def qr_code_view(request):
     person = None
     if request.session.get('role') == 'customer':
         person = Customer.get_customer(request.session.get('token'))
-
     img = generate_qr_code(encrypt_serializer_object(serialize_object(person)))
+    return HttpResponse(img.getvalue(), content_type="image/png")
+
+
+@role_login_required(allowed_roles=['employee'])
+def qr_code_view(request, order_id):
+    employee = Employee.get_employee(request.session.get('token'))
+    data = {
+        "id": order_id,
+        "station_name": employee.station.station_name
+    }
+
+    # Convertir a JSON
+    json_data = json.dumps(data)
+    img = generate_qr_code(json_data)
     return HttpResponse(img.getvalue(), content_type="image/png")
 
 
@@ -122,8 +145,8 @@ def qr_page(request):
 @role_login_required(allowed_roles=['customer'])
 def mostrar_autos(request):
     try:
-        customer = Customer.objects.get(token=request.session['token'])
-        autos = Vehicle.objects.filter(customer=customer)
+        customer = Customer.get_customer(token=request.session['token'])
+        autos = Vehicle.get_vehicle_by_customer(customer.token)
         return render(request, 'MainApp/contentAuto.html', {'autos': autos})
     except Customer.DoesNotExist:
         return render(request, 'AuthViews/register.html')
@@ -155,17 +178,9 @@ def registrar_auto(request):
 @role_login_required(allowed_roles=['employee'])
 def mostrar_estacion(request):
     # Datos de ejemplo, estos datos deben provenir de tu base de datos
-    vehiculos = [
-        {
-            'placa': 'PDB-1856',
-            'especificaciones': 'Aceite sintético, 5W-30, 5 litros'
-        },
-        {
-            'placa': 'XYZ-1234',
-            'especificaciones': 'Aceite mineral, 10W-40, 4 litros'
-        }
-    ]
-    return render(request, 'MainApp/contentEstacion.html', {'vehiculos': vehiculos})
+    employee = Employee.get_employee(request.session['token'])
+    dtos = Order.get_station_dto(employee.station.id)
+    return render(request, 'MainApp/contentEstacion.html', {'dtos': dtos})
 
 
 def send_email_form(request):
@@ -213,6 +228,7 @@ def password_confirmation(request):
                 auth_user = AuthUser()
                 auth_user.update_password(token=token_user, password=password)
                 logout_user(request)
+                AuthLog.create_log(request.META.get('REMOTE_ADDR'), AuthLog.EventType.PASSWORD_CHANGE)
                 return redirect('login')
             except Exception as e:
                 return render(request, 'AuthViews/tokenInput.html', {'form': form, 'error': e})
@@ -245,64 +261,45 @@ def logout_user(request):
 
 @role_login_required(allowed_roles=['customer'])
 def ordenar_servicio(request, id):
+    print(id)
     vehicle = Vehicle.get_vehicle_by_placa(id)
     if vehicle.customer.token == request.session.get('token'):
-        return render(request, 'MainApp/orderServicio.html', context={'vechicle': vehicle})
+        services = Service.get_services()
+        return render(request, 'MainApp/orderServicio.html', context={'vechicle': vehicle, 'services': services})
     else:
         return redirect('mostrarAutos')
 
 
+@role_login_required(allowed_roles=['customer'])
+def generate_order(request):
+    if request.method == 'POST':
+        vehicle = Vehicle.get_vehicle_by_placa(request.POST.get('id'))
+        if vehicle.customer.token == request.session.get('token'):
+            customer = Customer.get_customer(request.session.get('token'))
+            services = Service.get_service_list_by_names(request.POST.getlist('servicios'))
+            order = Order()
+
+            order.generate_order(customer, vehicle, services)
+            return redirect('mostrarAutos')
+        else:
+            return redirect('mostrarAutos')
+    else:
+        redirect('default_view')
+
+
 @role_login_required(allowed_roles=['admin'])
 def listar_ordenes(request):
-    ordenes = [
-        {
-            'id': 1,
-            'cliente': {'nombre': 'Juan Pérez'},
-            'placa': 'PCM-6769',
-            'valor_total': 15000,
-            'estado': 'Pagado'
-        },
-        {
-            'id': 2,
-            'cliente': {'nombre': 'Ana López'},
-            'placa': 'PDB-1856',
-            'valor_total': 18000,
-            'estado': 'No Pagado'
-        },
-        {
-            'id': 3,
-            'cliente': {'nombre': 'Luis Martínez'},
-            'placa': 'PBB-1412',
-            'valor_total': 20000,
-            'estado': 'Pagado'
-        }
-    ]
-    return render(request, 'MainApp/contentOrdenes.html', {'ordenes': ordenes})
+    ordenes = Order.get_orders()
+    return render(request, 'MainApp/AdminViews/contentOrdenes.html', {'ordenes': ordenes})
 
 
 @role_login_required(allowed_roles=['admin'])
 def detalle_orden(request, id):
-    orden = {
-        'id': id,
-        'fecha': '2023-07-10',
-        'cliente': {'nombre': 'Juan Pérez'},
-        'vehiculo': 'PCM-6769'
-    }
-    servicios = [
-        {
-            'codigo': 1,
-            'descripcion': 'Cambio de aceite',
-            'total': 50.00
-        },
-        {
-            'codigo': 2,
-            'descripcion': 'Revisión de frenos',
-            'total': 30.00
-        }
-    ]
-    valor_total = sum(servicio['total'] for servicio in servicios)
-    return render(request, 'MainApp/contentDetalleOrden.html',
-                  {'orden': orden, 'servicios': servicios, 'valor_total': valor_total})
+    orden = Order.get_order_by_id(id)
+    valor_total = orden.total
+    return render(request, 'MainApp/AdminViews/contentDetalleOrden.html',
+                  {'orden': orden, 'servicios': orden.service.all(), 'valor_total': valor_total,
+                   'id': id})
 
 
 def upload_qr(request):
@@ -330,12 +327,12 @@ def create_admin(request):
     admin.create_admin("daniel", "vargas", token)
     admin.save()
     return redirect('login')
-    return render(request, 'MainApp/contentDetalleOrden.html',
+    return render(request, 'MainApp/AdminViews/contentDetalleOrden.html',
                   {'orden': orden, 'servicios': servicios, 'valor_total': valor_total})
 
 
 @role_login_required(allowed_roles=['customer'])
-def payment(request):
+def payment(request, id):
     if request.method == 'POST':
         form = PaymentForm(request.POST)
         if form.is_valid():
@@ -347,32 +344,61 @@ def payment(request):
 
     else:
         form = PaymentForm()
-    return render(request, 'MainApp/contentPayment.html', {'form': form})
+        order = Order.get_order_by_id_and_customer(id, Customer.get_customer(request.session['token']))
+    return render(request, 'MainApp/contentPayment.html',
+                  {'form': form, 'order': order, 'services': order.service.all()})
 
 
 @role_login_required(allowed_roles=['customer'])
-def transferencia(request):
+def transferencia(request, id):
     if request.method == 'POST':
-        form = TransferenciaForm(request.POST, request.FILES)
+        form = TransferenciaImgForm(request.POST, request.FILES)
+        print(form.is_valid())
         if form.is_valid():
-            return redirect('success')
+            orden = Order.get_order_by_id_and_customer(id=id,
+                                                       customer=Customer.get_customer(request.session['token']))
+            try:
+
+                payment = Payment()
+                payment.order = orden
+                payment.tipo = Payment.TIPO_TRANSFERENCIA
+                if 'file' in request.FILES:
+                    image_file = request.FILES['file']
+                    payment.imagen_transferencia = image_file.read()
+                orden.state = Order.PAGADO
+                with transaction.atomic(using=AUTH_DATABASE):
+                    payment.save()
+                    with transaction.atomic(using='default'):
+                        orden.save()
+
+            except IntegrityError as e:
+                AuthLog.create_log(request.META.get('REMOTE_ADDR'), AuthLog.EventType.FAILED_PAYMENT)
+                return redirect('default_view')
+
+            return redirect('success', {'id': orden.id})
+
     else:
-        form = TransferenciaForm()
-    return render(request, 'MainApp/contentTransferencia.html', {'form': form})
+        form = TransferenciaImgForm()
+    return render(request, 'MainApp/contentTransferencia.html',
+                  {'form': form, 'order': Order.get_order_by_id(order_id=id)})
 
 
 @role_login_required(allowed_roles=['customer'])
-def retirarAuto(request):
+def retirarAuto(request, id):
     if request.method == 'POST':
         form = retirarAutoForm(request.POST, request.FILES)
+        print(form.is_valid())
         if form.is_valid():
-            # Procesa los datos del formulario aquí, por ejemplo, guardándolos en la base de datos
-            # name = form.cleaned_data['name']
-            # last_name = form.cleaned_data['last_name']
-            # cellphone = form.cleaned_data['cellphone']
-            # ci = form.cleaned_data['ci']
-            # file = form.cleaned_data['file']
-            # Redirige a una página de éxito
+            name = form.cleaned_data.get('name')
+            last_name = form.cleaned_data.get('last_name')
+            ci = form.cleaned_data.get('ci')
+            guest = Guest()
+            if 'file' in request.FILES:
+                image_file = request.FILES['file']
+                file = image_file.read()
+                guest.create_guest(ci, name, last_name, file)
+
+            guest.save()
             return redirect('success')
     else:
         form = retirarAutoForm()
@@ -384,20 +410,54 @@ def success(request):
 
 
 def subirQR(request):
-    return render(request, 'MainApp/subirQR.html')
+    if request.method == 'POST':
+        form = QRCodeForm(request.POST, request.FILES)
+        if form.is_valid():
+            image = form.cleaned_data['qr_code']
+            try:
+                img = Image.open(image)
+                decoded_objects = decode(img)
+                qr_content = [obj.data.decode('utf-8') for obj in decoded_objects]
+
+                print(qr_content)
+                return render(request, 'QR/result.html', {'data': qr_content})
+            except (IOError, ValueError) as e:
+                return render(request, 'AuthViews/login.html', {'error': str(e)})
+    else:
+        form = QRCodeForm()
+        return render(request, 'MainApp/subirQR.html', {'form': form})
+
+
+@role_login_required(allowed_roles=['employee'])
+def update_state(request):
+    if request.method == 'POST':
+        form = QRCodeForm(request.POST, request.FILES)
+        if form.is_valid():
+            image = form.cleaned_data['qr_code']
+            try:
+                img = Image.open(image)
+                decoded_objects = decode(img)
+                qr_content = [obj.data.decode('utf-8') for obj in decoded_objects]
+                json_str = qr_content[0]
+                data = json.loads(json_str)
+                station_id = data['id']
+                station_name = data['station_name']
+                Order.update_state(station_id, station_name)
+                return redirect('default_view')
+            except (IOError, ValueError) as e:
+                return render(request, 'AuthViews/login.html', {'error': str(e)})
+    else:
+        form = QRCodeForm()
+        return render(request, 'MainApp/subirQR.html', {'form': form})
 
 
 @role_login_required(allowed_roles=['admin'])
 def mostrar_servicios(request):
-    services = [
-        {"id": 1, "nombre": "Servicio 1", "descripcion": "Desdddddción 1", "precio": 100},
-        {"id": 2, "nombre": "Servicio 2", "descripcion": "Descripción 2", "precio": 200},
-        # Agrega más servicios según sea necesario
-    ]
+    services = Service.get_services()
     context = {
         'services': services
     }
-    return render(request, 'MainApp/contentServices.html', context)
+    return render(request, 'MainApp/AdminViews/contentServices.html', context)
 
 
 @role_login_required(allowed_roles=['admin'])
@@ -405,40 +465,132 @@ def crearServicios(request):
     if request.method == 'POST':
         form = crearServicioForm(request.POST)
         if form.is_valid():
-            # Aquí asumimos que tienes un modelo para el servicio y un método save en el formulario
-            # Si no, deberías manejar el guardado del servicio aquí manualmente
-            form.save()
+            service = Service()
+            service.create_service(form.cleaned_data.get('estacionServicio'), form.cleaned_data.get('nombreServicio'),
+                                   form.cleaned_data.get('descripcionServicio'),
+                                   form.cleaned_data.get('precioServicio'))
             return redirect('mostrarServicios')
     else:
         form = crearServicioForm()
-    return render(request, 'MainApp/crear_servicio.html', {'form': form})
+    return render(request, 'MainApp/AdminViews/crear_servicio.html', {'form': form})
 
 
-def editarServicios(request, service_id):
-    servicios_data = [
-        {"id": 1, "nombre": "Servicio 1", "descripcion": "Descripción 1", "precio": 100},
-        {"id": 2, "nombre": "Servicio 2", "descripcion": "Descripción 2", "precio": 200},
-        # Agrega más servicios según sea necesario
-    ]
-
-    # Encuentra el servicio por su id
-    servicio = next((s for s in servicios_data if s["id"] == service_id), None)
-    if not servicio:
-        return render(request, '404.html', status=404)
+@role_login_required(allowed_roles=['admin'])
+def editarServicios(request, id):
+    servicio = Service.get_service_by_name(service_id=id)
 
     if request.method == 'POST':
+        # Pasar la instancia del servicio al formulario
         form = crearServicioForm(request.POST)
         if form.is_valid():
             # Aquí puedes simular la actualización del servicio
-            servicio["nombre"] = form.cleaned_data['nombreServicio']
-            servicio["descripcion"] = form.cleaned_data['descripcionServicio']
-            servicio["precio"] = form.cleaned_data['precioServicio']
+            servicio.name = form.cleaned_data['nombreServicio']
+            servicio.description = form.cleaned_data['descripcionServicio']
+            servicio.price = form.cleaned_data['precioServicio']
+            servicio.save()
             return redirect('mostrarServicios')  # Redirige a la lista de servicios (deberás definir esta vista)
     else:
+        # Inicializar el formulario con los datos actuales del servicio
         form = crearServicioForm(initial={
-            'nombreServicio': servicio['nombre'],
-            'descripcionServicio': servicio['descripcion'],
-            'precioServicio': servicio['precio'],
+            'nombreServicio': servicio.name,
+            'descripcionServicio': servicio.name,
+            'precioServicio': servicio.price,
+            'estacionServicio': servicio.station,
         })
 
-    return render(request, 'MainApp/editar_servicio.html', {'form': form, 'service_id': service_id})
+    return render(request, 'MainApp/AdminViews/editar_servicio.html', {'form': form, 'service_id': id})
+
+
+@role_login_required(['admin'])
+def agregar_empleado(request):
+    if request.method == 'POST':
+        nombre = request.POST.get('nombre')
+        apellido = request.POST.get('apellido')
+        estacion_name = request.POST.get('estacion')
+        email = request.POST.get('email')
+
+        try:
+            user = AuthUser()
+            employee = Employee()
+            password_char = string.ascii_letters + string.digits
+            password = ''.join(random.choice(password_char) for _ in range(8))
+
+            while not (any(c.isupper() for c in password) and any(c.isdigit() for c in password)):
+                password = ''.join(random.choice(password_char) for _ in range(8))
+
+            username = "emp" + nombre + apellido
+
+            token = user.create_user(username, password, email)
+            employee.create_employee(nombre, apellido, token, Station.get_station_by_name(estacion_name))
+            # 4 Transaction
+            with transaction.atomic(using=AUTH_DATABASE):
+                user.save()
+                with transaction.atomic(using='default'):
+                    employee.save()
+                    send_credentias_email(email, username, password)
+        except IntegrityError as e:
+            return render(request, 'MainApp/AdminViews/registratEmpleado.html', {'error': e})
+        except InvalidPassword as e:
+            return render(request, 'MainApp/AdminViews/registratEmpleado.html', {'error': e})
+
+        return redirect('listar_ordenes')
+    else:
+        estaciones = Station.get_stations()
+        return render(request, 'MainApp/AdminViews/registratEmpleado.html', {'estaciones': estaciones})
+
+
+@role_login_required(allowed_roles=['admin'])
+def delete_service(request, id):
+    print(id)
+    Service.delete_service(id)
+    return redirect('mostrarServicios')
+
+
+@role_login_required(allowed_roles=['customer'])
+def orders(request):
+    ordenes = Order.get_orders_by_client(Customer.get_customer(request.session['token']))
+    return render(request, 'MainApp/CustomerOrders/contentOrdenes.html', {'ordenes': ordenes})
+
+
+@role_login_required(allowed_roles=['customer'])
+def detalle_orden_cliente(request, id):
+    orden = Order.get_order_by_id_and_customer(id=id, customer=Customer.get_customer(request.session['token']))
+
+    return render(request, 'MainApp/CustomerOrders/contentDetalleOrden.html',
+                  {'orden': orden, 'services': orden.service.all()})
+
+
+def upload_payment(request, id):
+    orden = Order.get_order_by_id_and_customer(id=id, customer=Customer.get_customer(request.session['token']))
+    try:
+
+        payment = Payment()
+        payment.order = orden
+        payment.tipo = Payment.TIPO_VENTANILLA
+        payment.estado = Payment.ESTADO_PAGADO
+        orden.state = Order.PAGADO
+
+        with transaction.atomic(using=AUTH_DATABASE):
+            payment.save()
+            with transaction.atomic(using='default'):
+                orden.save()
+
+    except IntegrityError as e:
+        AuthLog.create_log(request.META.get('REMOTE_ADDR'), AuthLog.EventType.FAILED_PAYMENT)
+        return redirect('default_view')
+
+
+    return render(request, 'MainApp/success.html', {'id': orden.id})
+
+
+@role_login_required(allowed_roles=['admin'])
+def img_payment(request, id):
+    try:
+        payment = Payment.objects.get(pk=id)
+        if payment.imagen_transferencia:
+            AuthLog.create_log(request.META.get('REMOTE_ADDR'), AuthLog.EventType.PAYMENT_ACCECED)
+            return HttpResponse(payment.imagen_transferencia, content_type="image/jpeg")
+        else:
+            return None
+    except Payment.DoesNotExist:
+        return None

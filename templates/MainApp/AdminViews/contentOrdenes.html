@@ -1,0 +1,85 @@
+{% extends 'base/baseAdministrador.html' %}
+
+{% block content %}
+<style>
+  .table-striped tbody tr:nth-of-type(odd) {
+    background-color: #D9C49C;
+  }
+
+  .table-striped tbody tr:nth-of-type(even) {
+    background-color: #f8f9fa;
+  }
+
+  .table thead th {
+    background-color: #A62D43;
+    color: white;
+  }
+
+  .btn-primary {
+    background-color: #A62D43;
+    border-color: #A62D43;
+  }
+
+  .btn-primary:hover {
+    background-color: #D9C49C;
+    border-color: #D9C49C;
+  }
+
+  .card-title {
+    color: #A62D43;
+  }
+
+  .form-group label {
+    color: #A62D43;
+    font-weight: bold;
+  }
+
+
+
+</style>
+
+<div class="container mt-5">
+  <div class="d-flex justify-content-between align-items-center mb-3">
+    <h1 class="mx-auto text-center font-weight-bold" style="color: #A62D43;">
+      Ordenes
+    </h1>
+  </div>
+
+  <div class="row mb-3">
+    <div class="col-12">
+      
+       
+        <div class="card-body">
+          
+          <table class="table table-striped">
+            <thead>
+              <tr>
+                <th>ID</th>
+                <th>Nombre del Cliente</th>
+                <th>Vehículo</th>
+                <th>Valor Total</th>
+                <th>Estado</th>
+                <th>Acción</th>
+              </tr>
+            </thead>
+            <tbody>
+              {% for orden in ordenes %}
+              <tr>
+                <td>{{ orden.id }}</td>
+                <td>{{ orden.customer.name}} {{ orden.customer.last_name }}</td>
+                <td>{{ orden.vehicle.placa }}</td>
+                <td>{{ orden.total }}</td>
+                <td>{{ orden.state }}</td>
+                <td>
+                  <a href="{% url 'detalle_orden' orden.id %}" class="btn btn-primary">Ver Detalles</a>
+                </td>
+              </tr>
+              {% endfor %}
+            </tbody>
+          </table>
+        </div>
+      
+    </div>
+  </div>
+</div>
+{% endblock %}

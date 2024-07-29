@@ -1,4 +1,6 @@
+from MecanicaApp.models import Station
 from django import forms
+from django.core.exceptions import ValidationError
 
 
 class registerForm(forms.Form):
@@ -40,7 +42,7 @@ class tokenForm(forms.Form):
 
 class loginForm(forms.Form):
     user = forms.CharField(label="Usuario", max_length=200, widget=forms.TextInput(
-        attrs={'class': 'input form-control', 'placeholder': 'Ingrese su corrreo'}))
+        attrs={'class': 'input form-control', 'placeholder': 'Ingrese su usuario'}))
     password = forms.CharField(label="Contraseña", widget=forms.PasswordInput(
         attrs={'class': 'input form-control', 'placeholder': 'Ingrese una contraseña'}))
 
@@ -75,6 +77,16 @@ class crearServicioForm(forms.Form):
         }
     )
 
+    estacionServicio = forms.ModelChoiceField(
+        label="Estación",
+        queryset=Station.objects.all(),
+        widget=forms.Select(attrs={
+            'class': 'form-control mt-2'
+        })
+    )
+
+
+
     def clean_precioServicio(self):
         precio = self.cleaned_data.get('precioServicio')
         if precio is not None and precio.as_integer_ratio()[1] > 100:  # Chequea los decimales
@@ -85,21 +97,23 @@ class crearServicioForm(forms.Form):
 class QRCodeForm(forms.Form):
     qr_code = forms.ImageField()
 
+
 class PaymentForm(forms.Form):
     METODO_PAGO_CHOICES = [
         ('transferencia', 'Transferencia'),
         ('ventanilla', 'Pago en ventanilla'),
     ]
 
-
     metodo_pago = forms.ChoiceField(
         choices=METODO_PAGO_CHOICES,
         widget=forms.RadioSelect(attrs={'class': 'radio-label'})
     )
 
+
 class TransferenciaForm(forms.Form):
     file = forms.FileField(label='Selecciona un archivo', widget=forms.ClearableFileInput(
         attrs={'class': 'form-control', 'id': 'formFile', 'accept': 'image/*,.pdf'}))
+
 
 class retirarAutoForm(forms.Form):
     name = forms.CharField(label="Nombre", max_length=200, widget=forms.TextInput(
@@ -110,5 +124,48 @@ class retirarAutoForm(forms.Form):
         attrs={'class': 'input form-control', 'placeholder': 'Ingrese su teléfono'}))
     ci = forms.CharField(label="Cédula", max_length=200, widget=forms.NumberInput(
         attrs={'class': 'input form-control', 'placeholder': 'Ingrese su cédula'}))
-    file = forms.FileField(label='Subir cédula en imagen o pdf',widget=forms.ClearableFileInput(
-        attrs={'class': 'form-control','id': 'formFile','accept': 'image/*,.pdf'}))
+    file = forms.FileField(label='Subir cédula en imagen o pdf', widget=forms.ClearableFileInput(
+        attrs={'class': 'form-control', 'id': 'formFile', 'accept': 'image/*,.pdf'}))
+
+
+class PaymentForm(forms.Form):
+    METODO_PAGO_CHOICES = [
+        ('transferencia', 'Transferencia'),
+        ('ventanilla', 'Pago en ventanilla'),
+    ]
+
+    metodo_pago = forms.ChoiceField(
+        choices=METODO_PAGO_CHOICES,
+        widget=forms.RadioSelect(attrs={'class': 'radio-label'})
+    )
+
+
+class TransferenciaImgForm(forms.Form):
+    file = forms.ImageField(label='Selecciona un archivo', widget=forms.ClearableFileInput(
+        attrs={'class': 'form-control', 'id': 'formFile', 'accept': 'image/*,.pdf'}))
+
+
+class retirarAutoForm(forms.Form):
+    name = forms.CharField(label="Nombre", max_length=200, widget=forms.TextInput(
+        attrs={'class': 'input form-control', 'placeholder': 'Ingrese su nombre'}))
+    last_name = forms.CharField(label="Apellido", max_length=200, widget=forms.TextInput(
+        attrs={'class': 'input form-control', 'placeholder': 'Ingrese su apellido'}))
+    ci = forms.CharField(label="Cédula", max_length=200, widget=forms.NumberInput(
+        attrs={'class': 'input form-control', 'placeholder': 'Ingrese su cédula'}))
+    file = forms.ImageField(label='Selecciona un archivo', widget=forms.ClearableFileInput(
+        attrs={'class': 'form-control', 'id': 'formFile', 'accept': 'image/*,.pdf'}))
+
+
+# 4 QR
+class QRCodeForm(forms.Form):
+    qr_code = forms.ImageField(
+        label="Sube tu código QR",
+        widget=forms.ClearableFileInput(
+            attrs={
+                'class': 'form-control',
+                'id': 'formFile',
+                'accept': 'image/*',
+                'style': 'max-width: 560px; width: 100%; font-size: 20px;'
+            }
+        )
+    )

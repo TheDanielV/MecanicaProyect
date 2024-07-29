@@ -54,6 +54,17 @@ class AuthUser(models.Model):
 
     @classmethod
     def hashed_password(cls, password):
+        """
+        Genera un hash seguro de la contraseña utilizando el algoritmo scrypt.
+
+        Args:
+            password (str): La contraseña en texto plano que se desea hashear.
+
+        Returns:
+            str: La contraseña hasheada en formato hexadecimal.
+
+        """
+
         n = 2 ** 14
         r = 8
         p = 1

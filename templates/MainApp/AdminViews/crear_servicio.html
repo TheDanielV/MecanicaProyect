@@ -1,4 +1,4 @@
-{% extends 'base/servicios.html' %}
+{% extends 'base/baseAdministrador.html' %}
 {% block content %}
     
  
@@ -19,18 +19,18 @@
                    <div class="form-group mb-3">
                     <label for="{{ form.precioServicio.id_for_label }}">{{ form.precioServicio.label }}</label>
                     {{ form.precioServicio }}
-                    {% if form.precioServicio.errors %}
-                        <div class="invalid-feedback">
-                            {% for error in form.precioServicio.errors %}
-                                <p>{{ error }}</p>
-                            {% endfor %}
-                        </div>
-                    {% endif %}
+                     {{ form.precioServicio.errors }}
+                </div>
+
+                <div class="form-group mb-3">
+                    <label for="{{ form.estacionServicio.id_for_label }}">{{ form.estacionServicio.label }}</label>
+                    {{ form.estacionServicio}}
                 </div>
                 <div class="text-center">
                     <button type="submit" class="btn btn-primary custom-btn  btn-submit" >Guardar</button>
                     <a href="{% url 'mostrarServicios' %}" class="btn btn-secondary custom-btn btn-cancel">Cancelar</a>
                 </div>
+
             </form>
         </div>
     </div>

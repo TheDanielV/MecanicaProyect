@@ -1,0 +1,50 @@
+{% extends 'base/baseAdministrador.html' %}
+
+
+
+{% block content %}
+
+   <div class="container mt-5">
+        <div class="d-flex justify-content-between align-items-center mb-3">
+            <h1>Servicios</h1>
+      <button
+          class="btn btn-primary btn-submit"
+          onclick="window.location.href = '{% url 'crearServicio' %}'"
+          
+        >
+          Nuevo
+        </button>
+        </div>
+        <div class="table-responsive">
+            <table class="table table-bordered table-sm">
+                <thead  class="services-table">
+                    <tr style="background-color: #A62D43; color: white">
+                        <th style="max-width: 150px;">Nombre</th>
+                        <th style="max-width: 200px;">Descripción</th>
+                        <th style="max-width: 100px;">Precio</th>
+                        <th style = "max-width: 200px"> Estación</th>
+                        <th style="max-width: 150px;">Acciones</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for service in services %}
+                    <tr>
+                        <td class="text-wrap" style="word-break: break-word; max-width: 150px;">{{ service.name }}</td>
+                        <td class="text-wrap" style="word-break: break-word; max-width: 300px;">{{ service.description}}</td>
+                        <td class="text-wrap" style="word-break: break-word; max-width: 100px;">{{  service.price }}</td>
+                        <td class="text-wrap" style="word-break: break-word; max-width: 300px;">{{ service.station.station_name }}</td>
+                        <td class="text-nowrap" style="word-break: break-word; max-width: 150px;">
+                            <a href="{% url 'editar_servicio' service.id %}" class="btn btn-outline-success btn-sm">✏️</a>
+                            <a href="{% url 'deleteService' service.id %}" class="btn btn-outline-danger btn-sm">🗑️</a>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        
+        </div>
+    </div>
+
+
+
+{% endblock %}
