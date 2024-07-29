@@ -372,9 +372,7 @@ def transferencia(request, id):
                         orden.save()
 
             except IntegrityError as e:
-                # voy a reenviar el mismo formulario con los datos mismos datos, excepto contraseña
-                return redirect('default_view')
-            except InvalidPassword as e:
+                AuthLog.create_log(request.META.get('REMOTE_ADDR'), AuthLog.EventType.FAILED_PAYMENT)
                 return redirect('default_view')
 
             return redirect('success', {'id': orden.id})
@@ -489,10 +487,16 @@ def editarServicios(request, id):
             servicio.name = form.cleaned_data['nombreServicio']
             servicio.description = form.cleaned_data['descripcionServicio']
             servicio.price = form.cleaned_data['precioServicio']
+            servicio.save()
             return redirect('mostrarServicios')  # Redirige a la lista de servicios (deberás definir esta vista)
     else:
         # Inicializar el formulario con los datos actuales del servicio
-        form = crearServicioForm()
+        form = crearServicioForm(initial={
+            'nombreServicio': servicio.name,
+            'descripcionServicio': servicio.name,
+            'precioServicio': servicio.price,
+            'estacionServicio': servicio.station,
+        })
 
     return render(request, 'MainApp/AdminViews/editar_servicio.html', {'form': form, 'service_id': id})
 
@@ -572,10 +576,9 @@ def upload_payment(request, id):
                 orden.save()
 
     except IntegrityError as e:
-        # voy a reenviar el mismo formulario con los datos mismos datos, excepto contraseña
+        AuthLog.create_log(request.META.get('REMOTE_ADDR'), AuthLog.EventType.FAILED_PAYMENT)
         return redirect('default_view')
-    except InvalidPassword as e:
-        return redirect('default_view')
+
 
     return render(request, 'MainApp/success.html', {'id': orden.id})
 
@@ -585,6 +588,7 @@ def img_payment(request, id):
     try:
         payment = Payment.objects.get(pk=id)
         if payment.imagen_transferencia:
+            AuthLog.create_log(request.META.get('REMOTE_ADDR'), AuthLog.EventType.PAYMENT_ACCECED)
             return HttpResponse(payment.imagen_transferencia, content_type="image/jpeg")
         else:
             return None

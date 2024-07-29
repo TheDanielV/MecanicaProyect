@@ -42,7 +42,7 @@ class tokenForm(forms.Form):
 
 class loginForm(forms.Form):
     user = forms.CharField(label="Usuario", max_length=200, widget=forms.TextInput(
-        attrs={'class': 'input form-control', 'placeholder': 'Ingrese su corrreo'}))
+        attrs={'class': 'input form-control', 'placeholder': 'Ingrese su usuario'}))
     password = forms.CharField(label="Contraseña", widget=forms.PasswordInput(
         attrs={'class': 'input form-control', 'placeholder': 'Ingrese una contraseña'}))
 

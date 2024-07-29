@@ -8,9 +8,11 @@ from django.utils import timezone
 
 class AuthLog(models.Model):
     class EventType(Enum):
+        PAYMENT_ACCECED = 'Acceso a un pago'
         LOGIN_SUCCESS = 'Inicio de sesión exitoso'
         LOGIN_FAILURE = 'Inicio de sesión fallido'
         PASSWORD_CHANGE = 'Cambio de contraseña'
+        FAILED_PAYMENT = 'Error en el pago'
 
     ip_address = models.CharField(max_length=100)
     timestamp = models.DateTimeField(default=timezone.now)
