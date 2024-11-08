@@ -328,7 +328,7 @@ class Order(models.Model):
 
     @classmethod
     def get_order_by_id_and_customer(cls, id, customer):
-        dec_order = cls.objects.get(customer=customer, id=id)
+        dec_order = cls.objects.get(customer=customer, pk=id)
         dec_order.vehicle.placa = decrypt_data(dec_order.vehicle.placa)
         return dec_order
 

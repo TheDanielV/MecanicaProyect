@@ -353,17 +353,15 @@ def payment(request, id):
 def transferencia(request, id):
     if request.method == 'POST':
         form = TransferenciaImgForm(request.POST, request.FILES)
-        print(form.is_valid())
         if form.is_valid():
             orden = Order.get_order_by_id_and_customer(id=id,
                                                        customer=Customer.get_customer(request.session['token']))
             try:
-
                 payment = Payment()
                 payment.order = orden
                 payment.tipo = Payment.TIPO_TRANSFERENCIA
                 if 'file' in request.FILES:
-                    image_file = request.FILES['file']
+                    image_file = form.cleaned_data['file']
                     payment.imagen_transferencia = image_file.read()
                 orden.state = Order.PAGADO
                 with transaction.atomic(using=AUTH_DATABASE):
@@ -375,7 +373,7 @@ def transferencia(request, id):
                 AuthLog.create_log(request.META.get('REMOTE_ADDR'), AuthLog.EventType.FAILED_PAYMENT)
                 return redirect('default_view')
 
-            return redirect('success', {'id': orden.id})
+            return redirect('success')
 
     else:
         form = TransferenciaImgForm()
